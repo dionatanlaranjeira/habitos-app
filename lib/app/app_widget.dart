@@ -1,10 +1,10 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-
-import '../core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../core/core.dart';
+import '../global_modules/global_modules.dart';
+import '../l10n/app_localizations.dart';
 import '../shared/shared.dart';
 
 class AppWidget extends StatelessWidget {
@@ -19,19 +19,19 @@ class AppWidget extends StatelessWidget {
         initial: AdaptiveThemeMode.light,
         dark: UiConfig.darkTheme,
         builder: (light, dark) {
-          return MaterialApp.router(
-            theme: light,
-            darkTheme: dark,
-            debugShowCheckedModeBanner: false,
-            title: UiConfig.title,
-            locale: const Locale('pt', 'BR'),
-            supportedLocales: const [Locale('pt', 'BR')],
-            routerConfig: AppRouter.router,
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
+          return Consumer<LocaleStore>(
+            builder: (context, localeStore, _) {
+              return MaterialApp.router(
+                theme: light,
+                darkTheme: dark,
+                debugShowCheckedModeBanner: false,
+                title: 'Hábitos',
+                locale: localeStore.locale,
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                routerConfig: AppRouter.router,
+              );
+            },
           );
         },
       ),

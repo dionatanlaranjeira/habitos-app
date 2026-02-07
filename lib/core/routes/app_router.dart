@@ -1,11 +1,10 @@
-import 'package:provider/provider.dart';
-
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../../global_modules/global_modules.dart';
 import '../../modules/modules.dart';
-import '../../core/core.dart';
+import '../core.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -13,16 +12,18 @@ class AppRouter {
     routes: [SplashModule().route],
   );
 
-  static final List<SingleChildWidget> globalProviders = [
-    Provider<LocalSecureStorage>(create: (_) => LocalSecureStorageImpl()),
-    Provider<HttpAdapter>(create: (_) => HttpAdapter()),
-    Provider(
-      create: (context) => UserStore(
-        userRepository: UserRepositoryImpl(
-          httpAdapter: context.read<HttpAdapter>(),
+  static List<SingleChildWidget> get globalProviders => [
+        Provider<LocalSecureStorage>(create: (_) => LocalSecureStorageImpl()),
+        Provider<FirestoreAdapter>(create: (_) => FirestoreAdapter()),
+        Provider<FunctionsAdapter>(create: (_) => FunctionsAdapter()),
+        Provider<AuthRepository>(
+          create: (_) => AuthRepositoryImpl(),
         ),
-        localSecureStorage: context.read<LocalSecureStorage>(),
-      ),
-    ),
-  ];
+        ChangeNotifierProvider<LocaleStore>(
+          create: (_) => LocaleStore(ApplicationConfig.prefs),
+        ),
+        ChangeNotifierProvider<AuthStore>(
+          create: (ctx) => AuthStore(ctx.read<AuthRepository>()),
+        ),
+      ];
 }

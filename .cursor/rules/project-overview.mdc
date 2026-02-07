@@ -1,0 +1,42 @@
+---
+description: Visão geral da arquitetura Clean Arch + MVVM, tech stack e fluxo de dados
+alwaysApply: true
+---
+
+# Arquitetura - Clean Architecture + MVVM
+
+Arquitetura híbrida: princípios de Clean Architecture com padrão MVVM.
+
+## Regra de Dependência (Golden Rule)
+
+Dependências sempre apontam para dentro:
+- Camadas externas (UI, Frameworks) conhecem as internas.
+- Camadas internas (Domínio, Regras de Negócio) NÃO conhecem as externas.
+
+## Fluxo de Dados e Camadas
+
+| Camada | Componente | Responsabilidade |
+|--------|-----------|-----------------|
+| **View (UI)** | `Page` | Interface (StatelessWidget). Consome dados reativos e dispara ações no Controller. |
+| **ViewModel** | `Controller` | Gerencia estado via Mixin de Variáveis + Signals. Orquestra lógica com FutureHandler. |
+| **Model/Data** | `Repository` | Comunica com fontes de dados (API). Converte DTOs em Models (Entidades de Domínio). |
+| **Infra** | `AppRouter` | Configuração central de navegação e DI global. |
+
+## Tech Stack
+
+- **Flutter** ^3.38.7 · **Provider** ^6.1.5 (DI) · **GoRouter** ^16.0.0 (navegação)
+- **Signals** ^6.0.2 (estado reativo) · **Dio** ^5.8.0 (HTTP) · **Freezed** ^3.2.3 (imutabilidade)
+- **Firebase** (Remote Config, Analytics, Crashlytics) · **Flutter Secure Storage** (armazenamento seguro)
+
+## Flavors / Ambientes
+
+- `dev` → main_dev.dart · `hom` → main_hom.dart · `prd` → main.dart
+- Variáveis via Firebase Remote Config: `{FLAVOR}_PARAM_NAME`
+
+## Hierarquia de Dependência
+
+1. **Core** → não depende de ninguém (apenas packages externos)
+2. **Shared** → pode depender de Core
+3. **Global Modules** → podem depender de Shared e Core
+4. **Modules (Features)** → podem depender de Global Modules, Shared e Core
+5. **Modules NÃO dependem de outros Modules** (usar rotas para comunicação)

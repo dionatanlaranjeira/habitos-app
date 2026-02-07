@@ -1,0 +1,47 @@
+---
+description: Contexto de produto do Hábitos App - regras de negócio, entidades e escopo MVP
+alwaysApply: true
+---
+
+# Produto — Hábitos App (MVP)
+
+App de **campeonato de hábitos**: usuários competem com amigos em grupos fechados durante temporadas.
+Documento completo: `docs/product.md`
+
+## Entidades Principais
+
+- **Grupo**: espaço fechado de competição, 3–10 participantes, convite por link ou código
+- **Temporada**: período fixo (14 ou 30 dias), ranking encerrado e salvo no histórico ao final
+- **Hábito**: ação recorrente binária (feito/não feito), de uma biblioteca fixa
+- **Check-in**: registro diário (00:00–23:59), sem backfill, visível para o grupo
+
+## Regras de Negócio Críticas
+
+- Mínimo 3, máximo 5 hábitos por usuário
+- Hábitos escolhidos ANTES da temporada, sem troca durante
+- 1 hábito feito = 1 ponto (sem streak, sem multiplicador, sem bônus)
+- **Modo Normal**: 1 ponto por hábito feito
+- **Modo Hardcore**: só pontua se cumprir 100% dos hábitos no dia (senão 0)
+- Desempate: (1) mais dias ativos, (2) menos dias zerados, (3) empate técnico
+
+## Rankings
+
+- **Ranking da Temporada**: soma total de pontos — define o vencedor
+- **Ranking Semanal**: reset toda semana — engajamento e virada
+
+## Auth e Idioma
+
+- Firebase Auth: Email/Senha, Google, Apple
+- Multilíngue: pt-BR e en
+
+## Escopo MVP
+
+Inclui: auth, grupos com convite, temporadas, biblioteca de hábitos, check-in, rankings, histórico
+Fora: IA, recomendações, validação por imagem, wearables, feed social avançado
+
+## Princípios
+
+- Simplicidade > complexidade
+- Clareza > gamificação exagerada
+- Justiça > dopamina artificial
+- Pressão social leve > motivação forçada

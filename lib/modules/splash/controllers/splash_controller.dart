@@ -10,6 +10,6 @@ class SplashController with SplashVariables {
   }
 
   Future<void> init() async {
-    await ApplicationConfig().configureApp();
+    // Configuração é feita no AppBootstrap antes da splash
   }
 }

@@ -1,0 +1,86 @@
+---
+description: Gerência de estado com Signals e FutureHandler - padrão obrigatório
+globs: lib/**/*.dart
+alwaysApply: false
+---
+
+# Gerência de Estado — Signals & FutureHandler
+
+Biblioteca **Signals** para reatividade. **FutureHandler** é camada de abstração obrigatória.
+
+## FutureHandler — Elimina Boilerplate
+
+Encapsula execução assíncrona e atualiza `AsyncSignal` automaticamente:
+1. `AsyncLoading` → antes da chamada
+2. `AsyncData` → sucesso
+3. `AsyncError` → exceção
+
+```dart
+class FutureHandler<T> {
+  final AsyncSignal<T> asyncState;
+  final Future<T> repositoryFunction;
+  final ValueSetter<T>? onValue;        // Callback de sucesso (opcional)
+  final void Function(Object, StackTrace)? catchError;  // Erro específico (opcional)
+  final FutureOr<void> Function()? whenComplete;
+  // Ao tratar com catchError, o erro NÃO sobe para o ExceptionHandler Global
+}
+```
+
+## Uso no Controller
+
+1. Declarar `AsyncSignal` no **mixin de variáveis**
+2. Chamar `FutureHandler` passando signal e função do repositório
+
+```dart
+// Mixin
+mixin LoginVariables {
+  final loginAS = asyncSignal<AuthModel>(AsyncLoading());
+}
+
+// Controller
+class LoginController with LoginVariables {
+  final AuthRepository _repository;
+  LoginController(this._repository);
+
+  Future<void> doLogin() async {
+    final dto = LoginRequestDto(cpf: cpfController.text, password: passwordController.text);
+    await FutureHandler(
+      asyncState: loginAS,
+      repositoryFunction: _repository.authenticate(loginRequestDto: dto),
+      onValue: (response) => AppRoutes.goToHome(),
+      catchError: (e, s) => passwordController.clear(),
+    ).call();
+  }
+}
+```
+
+## Consumo na UI — SignalFutureBuilder
+
+Usar `Watch` + `SignalFutureBuilder` para reagir ao estado:
+
+```dart
+class LoginPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.read<LoginController>();
+    return Scaffold(
+      body: Watch((context) {
+        return SignalFutureBuilder<AuthModel>(
+          asyncState: controller.loginAS.value,
+          loadingWidget: const Center(child: CircularProgressIndicator()),
+          errorWidget: const Center(child: Text('Falha ao realizar login')),
+          builder: (authData) => Center(child: Text("Bem-vindo, ${authData.name}!")),
+        );
+      }),
+    );
+  }
+}
+```
+
+## Fluxo Completo
+
+1. Usuário clica → `controller.doLogin()`
+2. Controller monta DTO → `FutureHandler(...).call()`
+3. FutureHandler: `AsyncLoading` → View mostra loading
+4. Repository responde → `AsyncData` → View mostra conteúdo
+5. Ou erro → `AsyncError` → View mostra erro

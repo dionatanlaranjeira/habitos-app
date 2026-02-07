@@ -1,11 +1,15 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
-    namespace = "com.example.template_app"
+    namespace = "com.habitos"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -19,7 +23,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.template_app"
+        applicationId = "com.habitos"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -30,18 +34,18 @@ android {
     productFlavors {
         create("prd") {
             dimension = "default"
-            resValue("string", "app_name", "Template App")
+            resValue("string", "app_name", "Habitos")
         }
         create("hom") {
             dimension = "default"
             versionNameSuffix = ".hom"
-            resValue("string", "app_name", "Template App - Homologação")
+            resValue("string", "app_name", "Habitos - Homologação")
             applicationIdSuffix = ".hom"
         }
         create("dev") {
             dimension = "default"
             versionNameSuffix = ".dev"
-            resValue("string", "app_name", "Template App - Desenvolvimento")
+            resValue("string", "app_name", "Habitos - Desenvolvimento")
             applicationIdSuffix = ".dev"
         }
     }

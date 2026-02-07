@@ -1,2 +1,2 @@
-export 'adapters/adapters.dart';
-export 'interceptors/interceptors.dart';
+export 'firestore_adapter.dart';
+export 'functions_adapter.dart';

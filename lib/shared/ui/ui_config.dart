@@ -5,7 +5,7 @@ import '../shared.dart';
 class UiConfig {
   UiConfig._();
 
-  static String get title => 'Template App';
+  static String get title => 'Habitos';
 
   static ThemeData get lightTheme => ThemeData(
     brightness: Brightness.light,
