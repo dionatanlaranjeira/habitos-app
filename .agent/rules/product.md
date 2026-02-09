@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # App de Rotina e Bons Hábitos — Documento de Produto (MVP)
 
 ## 1. Visão Geral
@@ -193,3 +197,87 @@ O modo é escolhido pelo criador do grupo antes da temporada.
 - Reações sociais
 - Mensagens automáticas simples
 - Exploração futura de IA (fora do escopo inicial)
+
+## 16. Regras de Tempo e Timezone
+
+- O "dia" do check-in é definido pelo **timezone do grupo**.
+- O timezone do grupo é definido na criação (padrão: timezone do criador).
+- Janela de check-in: 00:00–23:59 no timezone do grupo.
+- Sem backfill no MVP: check-in só pode ser feito para o dia atual.
+
+## 17. Estados da Temporada
+
+- `draft`: grupo em formação, membros entram e escolhem hábitos
+- `active`: temporada em andamento, check-ins habilitados
+- `closed`: temporada encerrada, ranking final salvo
+
+Regras:
+- Temporada só inicia quando o criador clicar em **"Iniciar temporada"** (ou automaticamente ao atingir 3 membros — definir no projeto).
+- Hábitos só podem ser definidos/alterados em `draft`.
+
+## 18. Entrada e Saída de Membros
+
+- Entrada durante `draft`: permitida
+- Entrada durante `active`: (definir) permitida até 24h após início OU permitida sempre (entra do dia atual em diante)
+- Saída durante `active`: permitida, mas histórico da temporada permanece no ranking final como "saiu" (sem pontuar após sair)
+
+## 19. Biblioteca de Hábitos (MVP)
+
+- O app fornece uma biblioteca fixa inicial (15–25 hábitos), organizada por categorias.
+- Todos são binários (feito/não feito) e auto-declarados no MVP.
+- Cada usuário escolhe 3–5 hábitos ativos por temporada.
+
+## 20. Regras do Modo Hardcore (detalhado)
+
+- O usuário só pontua no dia se cumprir **100%** dos seus hábitos ativos.
+- Se cumprir 100%: pontuação do dia = número de hábitos ativos (3–5)
+- Caso contrário: pontuação do dia = 0
+
+
+---
+description: Contexto de produto do Hábitos App - regras de negócio, entidades e escopo MVP
+alwaysApply: true
+---
+
+# Produto — Hábitos App (MVP)
+
+App de **campeonato de hábitos**: usuários competem com amigos em grupos fechados durante temporadas.
+Documento completo: `docs/product.md`
+
+## Entidades Principais
+
+- **Grupo**: espaço fechado de competição, 3–10 participantes, convite por link ou código
+- **Temporada**: período fixo (14 ou 30 dias), ranking encerrado e salvo no histórico ao final
+- **Hábito**: ação recorrente binária (feito/não feito), de uma biblioteca fixa
+- **Check-in**: registro diário (00:00–23:59), sem backfill, visível para o grupo
+
+## Regras de Negócio Críticas
+
+- Mínimo 3, máximo 5 hábitos por usuário
+- Hábitos escolhidos ANTES da temporada, sem troca durante
+- 1 hábito feito = 1 ponto (sem streak, sem multiplicador, sem bônus)
+- **Modo Normal**: 1 ponto por hábito feito
+- **Modo Hardcore**: só pontua se cumprir 100% dos hábitos no dia (senão 0)
+- Desempate: (1) mais dias ativos, (2) menos dias zerados, (3) empate técnico
+
+## Rankings
+
+- **Ranking da Temporada**: soma total de pontos — define o vencedor
+- **Ranking Semanal**: reset toda semana — engajamento e virada
+
+## Auth e Idioma
+
+- Firebase Auth: Email/Senha, Google, Apple
+- Multilíngue: pt-BR e en
+
+## Escopo MVP
+
+Inclui: auth, grupos com convite, temporadas, biblioteca de hábitos, check-in, rankings, histórico
+Fora: IA, recomendações, validação por imagem, wearables, feed social avançado
+
+## Princípios
+
+- Simplicidade > complexidade
+- Clareza > gamificação exagerada
+- Justiça > dopamina artificial
+- Pressão social leve > motivação forçada

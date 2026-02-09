@@ -14,4 +14,15 @@ abstract class GroupRepository {
   Future<List<GroupModel>> getGroupsByUser(String userId);
 
   Future<GroupModel?> getGroupByCode(String code);
+
+  Future<void> saveMemberHabits({
+    required String groupId,
+    required String userId,
+    required List<String> habitIds,
+  });
+
+  Future<List<String>> getMemberHabits({
+    required String groupId,
+    required String userId,
+  });
 }

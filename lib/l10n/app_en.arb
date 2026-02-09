@@ -1,4 +1,19 @@
 {
   "@@locale": "en",
-  "appTitle": "Habits"
+  "@@ --- SHARED ---": "",
+  "shared_appTitle": "Habits",
+  "shared_confirm": "Confirm",
+  "@@ --- HABIT SELECTION ---": "",
+  "habitSelection_title": "Pick your habits",
+  "habitSelection_subtitle": "Select 3 to 5 habits for this season.",
+  "habitSelection_selected": "{count} selected",
+  "@habitSelection_selected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "habitSelection_minMax": "minimum 3, maximum 5",
+  "habitSelection_noHabitsFound": "No habits found."
 }

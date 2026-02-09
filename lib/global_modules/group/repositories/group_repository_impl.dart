@@ -10,7 +10,7 @@ const _groupsCollection = 'groups';
 
 class GroupRepositoryImpl implements GroupRepository {
   GroupRepositoryImpl({required FirestoreAdapter firestore})
-      : _firestore = firestore.instance;
+    : _firestore = firestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -64,14 +64,16 @@ class GroupRepositoryImpl implements GroupRepository {
 
   @override
   Future<List<GroupModel>> getGroupsByUser(String userId) async {
-    final snapshot = await _ref
-        .where('memberIds', arrayContains: userId)
-        .orderBy('createdAt', descending: true)
-        .get();
+    final snapshot = await _ref.where('memberIds', arrayContains: userId).get();
 
-    return snapshot.docs
+    final groups = snapshot.docs
         .map((doc) => GroupModel.fromFirestore(doc.id, doc.data()))
         .toList();
+
+    // Ordenação em memória para evitar a necessidade de índice composto no Firestore (memberIds + createdAt)
+    groups.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    return groups;
   }
 
   @override
@@ -83,9 +85,43 @@ class GroupRepositoryImpl implements GroupRepository {
     return GroupModel.fromFirestore(doc.id, doc.data());
   }
 
+  @override
+  Future<void> saveMemberHabits({
+    required String groupId,
+    required String userId,
+    required List<String> habitIds,
+  }) async {
+    final memberRef = _ref.doc(groupId).collection('members').doc(userId);
+
+    await memberRef.set({
+      'selectedHabitIds': habitIds,
+      'joinedAt': FieldValue.serverTimestamp(),
+      'status': 'active',
+    });
+  }
+
+  @override
+  Future<List<String>> getMemberHabits({
+    required String groupId,
+    required String userId,
+  }) async {
+    final doc = await _ref.doc(groupId).collection('members').doc(userId).get();
+
+    if (!doc.exists) return [];
+
+    final data = doc.data();
+    if (data == null) return [];
+
+    final habits = data['selectedHabitIds'];
+    if (habits is List) {
+      return habits.map((e) => e.toString()).toList();
+    }
+    return [];
+  }
+
   String _generateCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     final rng = Random.secure();
-    return List.generate(6, (_) => chars[rng.nextInt(chars.length)]).join();
+    return List.generate(6, (index) => chars[rng.nextInt(chars.length)]).join();
   }
 }

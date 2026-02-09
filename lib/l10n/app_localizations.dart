@@ -99,11 +99,47 @@ abstract class AppLocalizations {
     Locale('pt', 'BR'),
   ];
 
-  /// No description provided for @appTitle.
+  /// No description provided for @shared_appTitle.
   ///
-  /// In pt, this message translates to:
+  /// In pt_BR, this message translates to:
   /// **'Hábitos'**
-  String get appTitle;
+  String get shared_appTitle;
+
+  /// No description provided for @shared_confirm.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Confirmar'**
+  String get shared_confirm;
+
+  /// No description provided for @habitSelection_title.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Escolha seus hábitos'**
+  String get habitSelection_title;
+
+  /// No description provided for @habitSelection_subtitle.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Selecione de 3 a 5 hábitos para esta temporada.'**
+  String get habitSelection_subtitle;
+
+  /// No description provided for @habitSelection_selected.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'{count} selecionados'**
+  String habitSelection_selected(int count);
+
+  /// No description provided for @habitSelection_minMax.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'mínimo 3, máximo 5'**
+  String get habitSelection_minMax;
+
+  /// No description provided for @habitSelection_noHabitsFound.
+  ///
+  /// In pt_BR, this message translates to:
+  /// **'Nenhum hábito cadastrado.'**
+  String get habitSelection_noHabitsFound;
 }
 
 class _AppLocalizationsDelegate

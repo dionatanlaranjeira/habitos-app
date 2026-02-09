@@ -1,4 +1,19 @@
 {
   "@@locale": "pt_BR",
-  "appTitle": "Hábitos"
+  "@@ --- SHARED ---": "",
+  "shared_appTitle": "Hábitos",
+  "shared_confirm": "Confirmar",
+  "@@ --- HABIT SELECTION ---": "",
+  "habitSelection_title": "Escolha seus hábitos",
+  "habitSelection_subtitle": "Selecione de 3 a 5 hábitos para esta temporada.",
+  "habitSelection_selected": "{count} selecionados",
+  "@habitSelection_selected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "habitSelection_minMax": "mínimo 3, máximo 5",
+  "habitSelection_noHabitsFound": "Nenhum hábito cadastrado."
 }

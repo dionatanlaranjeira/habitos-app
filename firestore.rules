@@ -20,6 +20,26 @@ service cloud.firestore {
 
       // Permitir busca por código para qualquer usuário autenticado
       allow list: if request.auth != null;
+
+      // Subcoleção de membros: membros do grupo podem ler; o usuário pode gravar o próprio
+      match /members/{userId} {
+        allow read: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+        
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Biblioteca de hábitos: leitura para todos autenticados
+    match /habits/{habitId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Categorias: leitura para todos autenticados
+    match /categories/{categoryId} {
+      allow read: if request.auth != null;
+      allow write: if false;
     }
   }
 }

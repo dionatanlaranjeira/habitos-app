@@ -9,7 +9,7 @@ class GroupStore {
     effect(() {
       final authUser = _authStore.currentUser.value;
       if (authUser == null) {
-        groups.value = [];
+        groupsAS.value = AsyncData([]);
         return;
       }
       _loadGroups(authUser.uid);
@@ -19,19 +19,20 @@ class GroupStore {
   final GroupRepository _groupRepository;
   final AuthStore _authStore;
 
-  final groups = signal<List<GroupModel>>([]);
-  final isLoading = signal<bool>(false);
+  final groupsAS = asyncSignal<List<GroupModel>>(AsyncData([]));
 
-  bool get hasGroups => groups.value.isNotEmpty;
+  bool get hasGroups {
+    final state = groupsAS.value;
+    return state.hasValue && (state.value?.isNotEmpty ?? false);
+  }
 
   Future<void> _loadGroups(String userId) async {
+    groupsAS.value = AsyncLoading();
     try {
-      isLoading.value = true;
-      groups.value = await _groupRepository.getGroupsByUser(userId);
-    } catch (_) {
-      groups.value = [];
-    } finally {
-      isLoading.value = false;
+      final result = await _groupRepository.getGroupsByUser(userId);
+      groupsAS.value = AsyncData(result);
+    } catch (e, s) {
+      groupsAS.value = AsyncError(e, s);
     }
   }
 

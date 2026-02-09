@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 
 import '../shared.dart';
 
@@ -17,4 +18,6 @@ extension ThemeExtension on BuildContext {
   Color get backgroundColor => theme.scaffoldBackgroundColor;
 
   Color get surfaceColor => colorScheme.surface;
+
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
 }

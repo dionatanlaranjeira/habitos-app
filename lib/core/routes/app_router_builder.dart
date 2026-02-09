@@ -11,7 +11,8 @@ GoRouter createAppRouter(AuthStore authStore) {
     redirect: (context, state) {
       final isAuth = authStore.isAuthenticated;
       final location = state.matchedLocation;
-      final isAuthRoute = location == LoginModule.path || location == RegisterModule.path;
+      final isAuthRoute =
+          location == LoginModule.path || location == RegisterModule.path;
       final isSplash = location == SplashModule.path;
 
       if (isSplash) return null;
@@ -24,6 +25,8 @@ GoRouter createAppRouter(AuthStore authStore) {
       LoginModule().route,
       RegisterModule().route,
       HomeModule().route,
+      HabitSelectionModule().route,
+      GroupModule().route,
     ],
   );
   AppRouter.setRouter(router);
