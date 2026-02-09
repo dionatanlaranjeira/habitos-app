@@ -3,11 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:signals/signals_flutter.dart';
 
 import '../../../shared/shared.dart';
-import 'controllers/habit_selection_controller.dart';
-import 'models/category_model.dart';
-import 'models/habit_model.dart';
-import 'widgets/habit_selection_bottom_bar.dart';
-import 'widgets/habit_tile.dart';
+import 'controllers/controllers.dart';
+import 'models/models.dart';
+import 'widgets/widgets.dart';
 
 class HabitSelectionPage extends StatelessWidget {
   const HabitSelectionPage({super.key});

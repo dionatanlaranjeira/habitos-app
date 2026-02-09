@@ -29,6 +29,9 @@ class HomeController with HomeVariables {
       futureFunction: _groupRepository.createGroup(
         name: name,
         ownerId: _userId!,
+        seasonDuration: 14,
+        gameMode: 'normal',
+        timezone: 'America/Sao_Paulo',
       ),
       onValue: (group) async {
         groupNameController.clear();

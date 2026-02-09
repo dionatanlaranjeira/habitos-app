@@ -4,6 +4,11 @@ abstract class GroupRepository {
   Future<GroupModel> createGroup({
     required String name,
     required String ownerId,
+    required int seasonDuration,
+    required String gameMode,
+    required String timezone,
+    String status = 'draft',
+    DateTime? seasonStartDate,
   });
 
   Future<GroupModel?> joinGroupByCode({

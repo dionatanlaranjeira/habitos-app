@@ -16,6 +16,30 @@ trigger: always_on
 - **Classe Única por Arquivo (OBRIGATÓRIO):** É **PROIBIDO** criar mais de uma classe no mesmo arquivo, mesmo que sejam classes privadas (`_MinhaClasse`). Cada classe deve ter seu próprio arquivo para facilitar a localização e manutenção.
   - *Exceções ÚNICAS:* DTOs gerados com `Freezed` ou `Mixins` de variáveis que são usados exclusivamente pelo Controller no mesmo contexto de arquivo (seguindo o padrão de Mixins).
   - *Widgets auxiliares privados (`_MeuWidget`) devem ir para a pasta `widgets/` da feature.*
+  - **Exemplo:**
+    - ❌ ERRADO: `create_group_page.dart` com `_StepIdentity`, `_StepSeason`, `_StepMode` no mesmo arquivo
+    - ✅ CORRETO: `create_group_page.dart` + `widgets/step_identity.dart`, `widgets/step_season.dart`, `widgets/step_mode.dart`
+
+## Dados Dinâmicos (OBRIGATÓRIO)
+
+**NUNCA** use enums ou constantes estáticas para dados que podem mudar ou precisam de flexibilidade. **TUDO** no produto é dinâmico e deve ser carregado do Firestore.
+
+```dart
+// ❌ ERRADO — Dados estáticos no código
+enum GameMode { normal, hardcore }
+enum SeasonDuration { sprint14, marathon30 }
+
+// ✅ CORRETO — Dados carregados do Firestore
+class GameModeModel {
+  final String id;
+  final String name;
+  final String description;
+  
+  factory GameModeModel.fromFirestore(String id, Map<String, dynamic> data) { ... }
+}
+```
+
+**Regra:** Se o dado pode ser editado pelo admin, traduzido, ou ter novos valores adicionados no futuro, ele DEVE estar no Firestore, não no código.
 
 ## Renderização de Estado Assíncrono (OBRIGATÓRIO)
 
@@ -24,7 +48,7 @@ trigger: always_on
 ```dart
 // ✅ CORRETO
 SignalFutureBuilder<MeuModel>(
-  asyncState: controller.meuDadoAS.watch(context),
+  asyncState: controller.meuDadoAS.value,
   loadingWidget: CircularProgressIndicator(),
   builder: (data) => MeuWidget(data: data),
 )

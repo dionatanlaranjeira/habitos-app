@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/shared.dart';
-import '../controllers/home_controller.dart';
-import 'sheet_helpers.dart';
+import '../../../../core/core.dart';
+import '../../modules.dart';
 
 class HomeEmptyState extends StatelessWidget {
   const HomeEmptyState({super.key, required this.controller});
@@ -39,7 +39,7 @@ class HomeEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           FilledButton.icon(
-            onPressed: () => showCreateGroupSheet(context, controller),
+            onPressed: () => AppRouter.router.push(CreateGroupModule.path),
             icon: const Icon(Icons.add_rounded),
             label: const Text('Criar grupo'),
           ),

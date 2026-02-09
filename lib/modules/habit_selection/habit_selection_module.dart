@@ -1,19 +1,16 @@
 import 'package:provider/provider.dart';
 import '../../core/core.dart';
 import '../../global_modules/global_modules.dart';
-import 'controllers/habit_selection_controller.dart';
+import 'controllers/controllers.dart';
 import 'habit_selection_page.dart';
-import 'repositories/category_repository.dart';
-import 'repositories/category_repository_impl.dart';
-import 'repositories/habit_repository.dart';
-import 'repositories/habit_repository_impl.dart';
+import 'repositories/repositories.dart';
 
 class HabitSelectionModule extends ProviderModule {
-  static const String path = '/habit-selection';
+  static const String path = '/home/habit-selection';
 
   HabitSelectionModule()
     : super(
-        path: path,
+        path: 'habit-selection',
         page: const HabitSelectionPage(),
         bindings: (state) {
           // Pegando parâmetros passados via extra no GoRouter

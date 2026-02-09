@@ -21,6 +21,11 @@ class GroupRepositoryImpl implements GroupRepository {
   Future<GroupModel> createGroup({
     required String name,
     required String ownerId,
+    required int seasonDuration,
+    required String gameMode,
+    required String timezone,
+    String status = 'draft',
+    DateTime? seasonStartDate,
   }) async {
     final code = _generateCode();
     final docRef = _ref.doc();
@@ -31,6 +36,11 @@ class GroupRepositoryImpl implements GroupRepository {
       ownerId: ownerId,
       memberIds: [ownerId],
       createdAt: DateTime.now(),
+      seasonDuration: seasonDuration,
+      gameMode: gameMode,
+      timezone: timezone,
+      status: status,
+      seasonStartDate: seasonStartDate,
     );
     await docRef.set(group.toFirestore());
     return group;
@@ -59,6 +69,11 @@ class GroupRepositoryImpl implements GroupRepository {
       ownerId: group.ownerId,
       memberIds: [...group.memberIds, userId],
       createdAt: group.createdAt,
+      seasonDuration: group.seasonDuration,
+      gameMode: group.gameMode,
+      timezone: group.timezone,
+      status: group.status,
+      seasonStartDate: group.seasonStartDate,
     );
   }
 

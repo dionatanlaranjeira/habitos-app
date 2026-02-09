@@ -7,18 +7,18 @@ import 'home.dart';
 class HomeModule extends ProviderModule {
   static const String path = '/home';
 
-  HomeModule()
-      : super(
-          path: path,
-          page: const HomePage(),
-          bindings: (_) => [
-            Provider(
-              create: (ctx) => HomeController(
-                groupRepository: ctx.read<GroupRepository>(),
-                groupStore: ctx.read<GroupStore>(),
-                authStore: ctx.read<AuthStore>(),
-              ),
+  HomeModule({super.routes})
+    : super(
+        path: path,
+        page: const HomePage(),
+        bindings: (_) => [
+          Provider(
+            create: (ctx) => HomeController(
+              groupRepository: ctx.read<GroupRepository>(),
+              groupStore: ctx.read<GroupStore>(),
+              authStore: ctx.read<AuthStore>(),
             ),
-          ],
-        );
+          ),
+        ],
+      );
 }

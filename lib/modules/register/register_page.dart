@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:zard/zard.dart';
 
-import '../../core/core.dart';
 import '../../shared/shared.dart';
 import 'register.dart';
 
@@ -14,14 +12,8 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.read<RegisterController>();
-    final formKey = GlobalKey<FormState>();
-    final validator = FieldValidationHandler(
-      fields: {
-        'name': z.string().optional(),
-        'email': z.string().email(),
-        'password': z.string().min(6),
-      },
-    );
+    final validator = controller.validator;
+    final formKey = validator.formKey;
 
     return Scaffold(
       appBar: AppBar(
@@ -101,16 +93,14 @@ class RegisterPage extends StatelessWidget {
 
                   // Register button
                   Watch((_) {
-                    final isLoading =
-                        controller.registerSignal.value.isLoading;
+                    final isLoading = controller.registerSignal.value.isLoading;
                     return FilledButton(
                       onPressed: isLoading
                           ? null
                           : () {
                               if (formKey.currentState?.validate() ?? false) {
                                 if (controller.passwordController.text !=
-                                    controller
-                                        .confirmPasswordController.text) {
+                                    controller.confirmPasswordController.text) {
                                   return;
                                 }
                                 controller.register();

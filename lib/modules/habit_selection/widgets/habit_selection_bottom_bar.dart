@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:signals/signals_flutter.dart';
 
+import '../../../../core/core.dart';
+import '../../modules.dart';
 import '../../../../shared/shared.dart';
-import '../controllers/habit_selection_controller.dart';
 
 class HabitSelectionBottomBar extends StatelessWidget {
   const HabitSelectionBottomBar({super.key, required this.controller});
@@ -64,7 +65,12 @@ class HabitSelectionBottomBar extends StatelessWidget {
                   ? () async {
                       final success = await controller.confirmSelection();
                       if (success && context.mounted) {
-                        Navigator.of(context).pop(true);
+                        AppRouter.router.go(
+                          GroupModule.path.replaceFirst(
+                            ':groupId',
+                            controller.groupId,
+                          ),
+                        );
                       }
                     }
                   : null,

@@ -24,9 +24,13 @@ GoRouter createAppRouter(AuthStore authStore) {
       SplashModule().route,
       LoginModule().route,
       RegisterModule().route,
-      HomeModule().route,
-      HabitSelectionModule().route,
-      GroupModule().route,
+      HomeModule(
+        routes: [
+          HabitSelectionModule().route,
+          GroupModule().route,
+          CreateGroupModule().route,
+        ],
+      ).route,
     ],
   );
   AppRouter.setRouter(router);

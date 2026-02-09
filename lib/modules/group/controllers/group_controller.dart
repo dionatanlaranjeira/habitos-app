@@ -4,12 +4,10 @@ import '../../../global_modules/global_modules.dart';
 
 class GroupController {
   final String groupId;
-  final GroupRepository _groupRepository;
-
   GroupController({
     required GroupRepository groupRepository,
     required this.groupId,
-  }) : _groupRepository = groupRepository {
+  }) {
     _loadGroup();
   }
 

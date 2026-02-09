@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/core.dart';
+import '../../modules.dart';
 import '../../../shared/shared.dart';
-import '../controllers/home_controller.dart';
-import 'sheet_helpers.dart';
 
 class FabOptionsSheet extends StatelessWidget {
   const FabOptionsSheet({super.key, required this.controller});
@@ -35,7 +35,7 @@ class FabOptionsSheet extends StatelessWidget {
               subtitle: 'Comece um novo campeonato',
               onTap: () {
                 Navigator.of(context).pop();
-                showCreateGroupSheet(context, controller);
+                AppRouter.router.push(CreateGroupModule.path);
               },
             ),
             const SizedBox(height: 12),
