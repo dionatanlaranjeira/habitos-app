@@ -30,26 +30,6 @@ android {
         versionName = flutter.versionName
     }
 
-    flavorDimensions("default")
-    productFlavors {
-        create("prd") {
-            dimension = "default"
-            resValue("string", "app_name", "Habitos")
-        }
-        create("hom") {
-            dimension = "default"
-            versionNameSuffix = ".hom"
-            resValue("string", "app_name", "Habitos - Homologação")
-            applicationIdSuffix = ".hom"
-        }
-        create("dev") {
-            dimension = "default"
-            versionNameSuffix = ".dev"
-            resValue("string", "app_name", "Habitos - Desenvolvimento")
-            applicationIdSuffix = ".dev"
-        }
-    }
-
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
