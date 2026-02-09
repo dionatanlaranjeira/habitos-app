@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/core.dart';
-import '../global_modules/global_modules.dart';
-import '../l10n/app_localizations.dart';
 import '../shared/shared.dart';
+import 'app_router_scope.dart';
 
 class AppWidget extends StatelessWidget {
   const AppWidget({super.key});
@@ -18,22 +17,10 @@ class AppWidget extends StatelessWidget {
         light: UiConfig.lightTheme,
         initial: AdaptiveThemeMode.light,
         dark: UiConfig.darkTheme,
-        builder: (light, dark) {
-          return Consumer<LocaleStore>(
-            builder: (context, localeStore, _) {
-              return MaterialApp.router(
-                theme: light,
-                darkTheme: dark,
-                debugShowCheckedModeBanner: false,
-                title: 'Hábitos',
-                locale: localeStore.locale,
-                supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                routerConfig: AppRouter.router,
-              );
-            },
-          );
-        },
+        builder: (light, dark) => AppRouterScope(
+          lightTheme: light,
+          darkTheme: dark,
+        ),
       ),
     );
   }

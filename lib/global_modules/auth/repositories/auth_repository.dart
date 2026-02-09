@@ -15,5 +15,10 @@ abstract class AuthRepository {
 
   Future<firebase_auth.UserCredential> signInWithApple();
 
+  Future<firebase_auth.UserCredential> createUserWithEmail({
+    required String email,
+    required String password,
+  });
+
   Future<void> signOut();
 }

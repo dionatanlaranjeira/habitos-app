@@ -61,6 +61,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<firebase_auth.UserCredential> createUserWithEmail({
+    required String email,
+    required String password,
+  }) =>
+      _auth.createUserWithEmailAndPassword(email: email, password: password);
+
+  @override
   Future<void> signOut() async {
     await Future.wait([
       _auth.signOut(),

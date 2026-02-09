@@ -2,30 +2,28 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:signals/signals_flutter.dart';
 
 const _localeKey = 'app_locale';
 
-class LocaleStore extends ChangeNotifier {
+class LocaleStore {
   LocaleStore(this._prefs) {
     _loadLocale();
   }
 
   final SharedPreferences _prefs;
-  Locale _locale = const Locale('pt', 'BR');
+  final locale = signal<Locale>(const Locale('pt', 'BR'));
 
-  Locale get locale => _locale;
-
-  Future<void> setLocale(Locale locale) async {
-    if (_locale == locale) return;
-    _locale = locale;
-    await _prefs.setString(_localeKey, _localeToString(locale));
-    notifyListeners();
+  Future<void> setLocale(Locale value) async {
+    if (locale.value == value) return;
+    locale.value = value;
+    await _prefs.setString(_localeKey, _localeToString(value));
   }
 
   void _loadLocale() {
     final stored = _prefs.getString(_localeKey);
     if (stored != null) {
-      _locale = _localeFromString(stored);
+      locale.value = _localeFromString(stored);
     }
   }
 

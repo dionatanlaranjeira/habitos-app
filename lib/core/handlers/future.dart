@@ -1,10 +1,11 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:async';
+
 import 'package:signals/signals.dart';
 
 class FutureHandler<T> {
   final AsyncSignal<T> asyncState;
   Future<T> futureFunction;
-  ValueSetter<T>? onValue;
+  FutureOr<void> Function(T)? onValue;
   void Function(Object e, StackTrace s)? catchError;
 
   FutureHandler({
@@ -17,9 +18,9 @@ class FutureHandler<T> {
   Future<void> call() async {
     asyncState.value = AsyncLoading<T>();
     await futureFunction
-        .then((T response) {
+        .then((T response) async {
           asyncState.value = AsyncData(response);
-          if (onValue != null) onValue!(response);
+          if (onValue != null) await onValue!(response);
         })
         .catchError((Object e, StackTrace s) {
           asyncState.value = AsyncError(e, s);

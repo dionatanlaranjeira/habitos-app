@@ -8,6 +8,33 @@ alwaysApply: false
 
 Biblioteca **Signals** para reatividade. **FutureHandler** é camada de abstração obrigatória.
 
+## Stores globais — Signals (não ChangeNotifier)
+
+Stores de estado global (AuthStore, UserStore, LocaleStore) usam **signals** em vez de ChangeNotifier:
+
+```dart
+class AuthStore {
+  final currentUser = signal<User?>(null);
+  bool get isAuthenticated => currentUser.value != null;
+}
+
+class UserStore {
+  final user = signal<UserModel?>(null);
+  // Reage a AuthStore com effect()
+  UserStore(..., AuthStore authStore) {
+    effect(() {
+      final authUser = authStore.currentUser.value;
+      if (authUser == null) { user.value = null; return; }
+      _loadUser(authUser.uid);
+    });
+  }
+}
+```
+
+- **Provider** (não ChangeNotifierProvider) para expor stores
+- **Watch** para consumir signals na UI
+- go_router `refreshListenable`: passar o signal (ex: `authStore.currentUser`)
+
 ## FutureHandler — Elimina Boilerplate
 
 Encapsula execução assíncrona e atualiza `AsyncSignal` automaticamente:
@@ -34,7 +61,7 @@ class FutureHandler<T> {
 ```dart
 // Mixin
 mixin LoginVariables {
-  final loginAS = asyncSignal<AuthModel>(AsyncLoading());
+  final loginAS = asyncSignal<AuthModel>(AsyncData(null));
 }
 
 // Controller

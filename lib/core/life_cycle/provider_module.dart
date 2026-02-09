@@ -20,8 +20,13 @@ abstract class ProviderModule {
        _routes = routes;
   GoRoute get route => GoRoute(
     path: _path,
-    builder: (context, state) =>
-        MultiProvider(providers: _bindings(state) ?? [], child: _page),
+    builder: (context, state) {
+      final providers = _bindings(state);
+      if (providers == null || providers.isEmpty) {
+        return _page;
+      }
+      return MultiProvider(providers: providers, child: _page);
+    },
     routes: _routes,
   );
 }

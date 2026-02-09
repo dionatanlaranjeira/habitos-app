@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:flutter/foundation.dart';
+import 'package:signals/signals_flutter.dart';
 
 import '../repositories/auth_repository.dart';
 
-class AuthStore extends ChangeNotifier {
+class AuthStore {
   AuthStore(this._repository) {
     _subscription = _repository.authStateChanges.listen(_onAuthStateChanged);
   }
@@ -13,20 +13,17 @@ class AuthStore extends ChangeNotifier {
   final AuthRepository _repository;
   StreamSubscription<firebase_auth.User?>? _subscription;
 
-  firebase_auth.User? _user;
-  firebase_auth.User? get currentUser => _user;
+  final currentUser = signal<firebase_auth.User?>(null);
 
-  bool get isAuthenticated => _user != null;
+  firebase_auth.User? get user => currentUser.value;
+  bool get isAuthenticated => currentUser.value != null;
 
   void _onAuthStateChanged(firebase_auth.User? user) {
-    if (_user == user) return;
-    _user = user;
-    notifyListeners();
+    if (currentUser.value == user) return;
+    currentUser.value = user;
   }
 
-  @override
   void dispose() {
     _subscription?.cancel();
-    super.dispose();
   }
 }
