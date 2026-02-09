@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/shared.dart';
-import '../../../global_modules/global_modules.dart';
+import '../models/models.dart';
 import 'group_card.dart';
 
 class GroupList extends StatelessWidget {

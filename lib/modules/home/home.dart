@@ -1,3 +1,5 @@
+export 'models/models.dart';
+export 'repositories/repositories.dart';
 export 'controllers/controllers.dart';
 export 'mixins/mixins.dart';
 export 'widgets/widgets.dart';

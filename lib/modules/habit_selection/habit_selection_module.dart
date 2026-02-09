@@ -1,6 +1,6 @@
 import 'package:provider/provider.dart';
 import '../../core/core.dart';
-import '../../global_modules/global_modules.dart';
+import '../home/repositories/repositories.dart';
 import 'controllers/controllers.dart';
 import 'habit_selection_page.dart';
 import 'repositories/repositories.dart';

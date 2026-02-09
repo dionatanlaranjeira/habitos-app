@@ -17,6 +17,7 @@ abstract class GroupRepository {
   });
 
   Future<List<GroupModel>> getGroupsByUser(String userId);
+  Stream<List<GroupModel>> watchGroupsByUser(String userId);
 
   Future<GroupModel?> getGroupByCode(String code);
 

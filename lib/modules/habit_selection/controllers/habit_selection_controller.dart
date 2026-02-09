@@ -4,7 +4,7 @@ import '../models/category_model.dart';
 import '../models/habit_model.dart';
 import '../repositories/category_repository.dart';
 import '../repositories/habit_repository.dart';
-import '../../../global_modules/group/repositories/group_repository.dart';
+import '../../home/repositories/repositories.dart';
 
 class HabitSelectionController with HabitSelectionVariables {
   final HabitRepository _habitRepository;

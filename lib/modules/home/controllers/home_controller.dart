@@ -1,24 +1,70 @@
+import 'dart:async';
+import 'package:signals/signals_flutter.dart';
+
 import '../../../core/core.dart';
 import '../../../shared/shared.dart';
-import '../../../global_modules/global_modules.dart';
+import '../../../global_modules/auth/stores/auth_store.dart';
 import '../../habit_selection/habit_selection.dart';
-import '../../group/group.dart';
+import '../../group/group_module.dart';
 import '../home.dart';
 
 class HomeController with HomeVariables {
   HomeController({
     required GroupRepository groupRepository,
-    required GroupStore groupStore,
     required AuthStore authStore,
   }) : _groupRepository = groupRepository,
-       _groupStore = groupStore,
-       _authStore = authStore;
+       _authStore = authStore {
+    _init();
+  }
 
   final GroupRepository _groupRepository;
-  final GroupStore _groupStore;
   final AuthStore _authStore;
 
+  StreamSubscription<List<GroupModel>>? _subscription;
+  String? _currentUserId;
+
   String? get _userId => _authStore.user?.uid;
+
+  void _init() {
+    // Efeito para monitorar usuário e recriar assinatura
+    effect(() {
+      final uid = _authStore.user?.uid;
+
+      if (uid != _currentUserId) {
+        _currentUserId = uid;
+        _setupStream(uid);
+      }
+    });
+  }
+
+  void _setupStream(String? uid) {
+    _subscription?.cancel();
+
+    if (uid == null) {
+      groupsAS.value = AsyncData([]);
+      return;
+    }
+
+    groupsAS.value = AsyncLoading();
+
+    _subscription = _groupRepository
+        .watchGroupsByUser(uid)
+        .listen(
+          (data) {
+            groupsAS.value = AsyncData(data);
+          },
+          onError: (e, s) {
+            Log.error('Erro no stream de grupos', error: e, stackTrace: s);
+            groupsAS.value = AsyncError(e, s);
+          },
+        );
+  }
+
+  /// Método para compatibilidade (refresh manual), mas o stream já é live.
+  /// Pode ser usado para forçar uma reconexão se necessário.
+  Future<void> fetchGroups() async {
+    _setupStream(_userId);
+  }
 
   Future<void> createGroup() async {
     final name = groupNameController.text.trim();
@@ -34,15 +80,16 @@ class HomeController with HomeVariables {
         timezone: 'America/Sao_Paulo',
       ),
       onValue: (group) async {
+        if (group == null) return;
         groupNameController.clear();
-        await _groupStore.refresh();
-        Messages.success('Grupo "${group?.name}" criado!');
-        if (group != null) {
-          AppRouter.router.push(
-            HabitSelectionModule.path,
-            extra: {'groupId': group.id, 'userId': _userId},
-          );
-        }
+
+        // Stream atualiza sozinho, apenas feedback
+        Messages.success('Grupo "${group.name}" criado!');
+
+        AppRouter.router.push(
+          HabitSelectionModule.path,
+          extra: {'groupId': group.id, 'userId': _userId},
+        );
       },
       catchError: (e, s) {
         Log.error('Falha ao criar grupo', error: e, stackTrace: s);
@@ -67,7 +114,7 @@ class HomeController with HomeVariables {
           Messages.error('Código inválido ou grupo cheio.');
           return;
         }
-        await _groupStore.refresh();
+
         Messages.success('Você entrou no grupo "${group.name}"!');
         AppRouter.router.push(
           HabitSelectionModule.path,
@@ -83,8 +130,6 @@ class HomeController with HomeVariables {
 
   Future<void> selectGroup(GroupModel group) async {
     if (_userId == null) return;
-
-    // TODO: Adicionar loading state específico para seleção se o delay for perceptível
 
     try {
       final habits = await _groupRepository.getMemberHabits(
@@ -106,5 +151,13 @@ class HomeController with HomeVariables {
       Log.error('Erro ao selecionar grupo', error: e, stackTrace: s);
       Messages.error('Erro ao acessar o grupo. Tente novamente.');
     }
+  }
+
+  // Importante: Controller deve limpar subscription ao ser descartado
+  // O Dart/Flutter não tem destrutor garantido para classes puras,
+  // mas como é um singleton/factory via GetIt ou similar, esperamos que dure.
+  // Se fosse um AutoDispose, precisaríamos de um método dispose().
+  void dispose() {
+    _subscription?.cancel();
   }
 }

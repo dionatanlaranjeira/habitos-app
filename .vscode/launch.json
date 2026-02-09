@@ -2,34 +2,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Desenvolvimento",
+            "name": "Run",
             "request": "launch",
-            "type": "dart",
-            "program": "lib/main_dev.dart",
-            "args": [
-                "--flavor",
-                "dev"
-            ]
-        },
-        {
-            "name": "Homologação",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main_hom.dart",
-            "args": [
-                "--flavor",
-                "hom"
-            ]
-        },
-        {
-            "name": "Produção",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": [
-                "--flavor",
-                "prd"
-            ]
+            "type": "dart"
         }
     ]
 }

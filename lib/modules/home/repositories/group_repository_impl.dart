@@ -79,16 +79,27 @@ class GroupRepositoryImpl implements GroupRepository {
 
   @override
   Future<List<GroupModel>> getGroupsByUser(String userId) async {
-    final snapshot = await _ref.where('memberIds', arrayContains: userId).get();
+    final snapshot = await _ref
+        .where('memberIds', arrayContains: userId)
+        .orderBy('createdAt', descending: true)
+        .get();
 
-    final groups = snapshot.docs
+    return snapshot.docs
         .map((doc) => GroupModel.fromFirestore(doc.id, doc.data()))
         .toList();
+  }
 
-    // Ordenação em memória para evitar a necessidade de índice composto no Firestore (memberIds + createdAt)
-    groups.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    return groups;
+  @override
+  Stream<List<GroupModel>> watchGroupsByUser(String userId) {
+    return _ref
+        .where('memberIds', arrayContains: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => GroupModel.fromFirestore(doc.id, doc.data()))
+              .toList(),
+        );
   }
 
   @override

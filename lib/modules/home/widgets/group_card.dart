@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/shared.dart';
-import '../../../global_modules/global_modules.dart';
+// Models exported by home.dart
 import '../home.dart';
 
 class GroupCard extends StatelessWidget {

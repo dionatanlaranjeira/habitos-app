@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:signals/signals.dart';
 import 'package:zard/zard.dart';
 import '../../../core/core.dart';
-import '../../../global_modules/global_modules.dart';
+import '../../home/models/models.dart';
 import '../models/game_mode_model.dart';
 import '../models/season_duration_model.dart';
 

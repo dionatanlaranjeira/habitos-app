@@ -1,6 +1,7 @@
 import 'package:signals/signals_flutter.dart';
 
-import '../../../global_modules/global_modules.dart';
+import '../../home/models/models.dart';
+import '../../home/repositories/repositories.dart';
 
 class GroupController {
   final String groupId;

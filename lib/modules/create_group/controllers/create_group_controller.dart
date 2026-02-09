@@ -1,7 +1,9 @@
 import '../../../core/core.dart';
 import '../../../shared/shared.dart';
-import '../../../global_modules/global_modules.dart';
+import '../../../global_modules/auth/stores/auth_store.dart';
 import '../../habit_selection/habit_selection.dart';
+import '../../home/models/models.dart';
+import '../../home/repositories/repositories.dart';
 import '../mixins/mixins.dart';
 import '../repositories/repositories.dart';
 
@@ -9,18 +11,15 @@ class CreateGroupController with CreateGroupVariables {
   CreateGroupController({
     required GroupRepository groupRepository,
     required CreateGroupRepository createGroupRepository,
-    required GroupStore groupStore,
     required AuthStore authStore,
   }) : _groupRepository = groupRepository,
        _createGroupRepository = createGroupRepository,
-       _groupStore = groupStore,
        _authStore = authStore {
     _loadOptions();
   }
 
   final GroupRepository _groupRepository;
   final CreateGroupRepository _createGroupRepository;
-  final GroupStore _groupStore;
   final AuthStore _authStore;
 
   String? get _userId => _authStore.user?.uid;
@@ -94,7 +93,6 @@ class CreateGroupController with CreateGroupVariables {
       ),
       onValue: (group) async {
         if (group == null) return;
-        await _groupStore.refresh();
         Messages.success('Grupo "${group.name}" criado com sucesso!');
 
         AppRouter.router.go(
