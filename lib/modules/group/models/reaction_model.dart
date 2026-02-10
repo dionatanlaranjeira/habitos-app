@@ -5,12 +5,14 @@ class ReactionModel {
   final String userId;
   final String emoji;
   final DateTime createdAt;
+  final String? checkinId;
 
   const ReactionModel({
     required this.id,
     required this.userId,
     required this.emoji,
     required this.createdAt,
+    this.checkinId,
   });
 
   factory ReactionModel.fromFirestore(String id, Map<String, dynamic> data) {
@@ -20,6 +22,7 @@ class ReactionModel {
       userId: data['userId'] as String? ?? '',
       emoji: data['emoji'] as String? ?? '',
       createdAt: createdAt is Timestamp ? createdAt.toDate() : DateTime.now(),
+      checkinId: data['checkinId'] as String?,
     );
   }
 
@@ -27,5 +30,6 @@ class ReactionModel {
     'userId': userId,
     'emoji': emoji,
     'createdAt': Timestamp.fromDate(createdAt),
+    if (checkinId != null) 'checkinId': checkinId,
   };
 }

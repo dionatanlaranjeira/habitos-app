@@ -16,6 +16,13 @@ abstract class InteractionRepository {
     required String checkinId,
   });
 
+  /// Get all reactions by a specific user for a given date.
+  Future<List<ReactionModel>> getReactionsByUserAndDate({
+    required String groupId,
+    required String userId,
+    required String date,
+  });
+
   /// Add a comment to a check-in.
   /// The Cloud Function will handle updating the comment count.
   Future<void> addComment({

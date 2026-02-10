@@ -23,4 +23,10 @@ mixin GroupVariables {
   final pendingDescriptions = mapSignal<String, String>(
     {},
   ); // habitId -> String
+
+  // CheckInId -> emoji reacted by current user (null = nenhuma)
+  final myReactionsByCheckIn = mapSignal<String, String?>({});
+
+  // Sinal para escritas de interações sociais (fire-and-forget)
+  final socialWriteAS = asyncSignal<void>(AsyncData(null));
 }

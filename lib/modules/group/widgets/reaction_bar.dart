@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
+import 'package:keyboard_emoji_picker/keyboard_emoji_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 import '../controllers/group_controller.dart';
 import '../models/models.dart';
@@ -18,37 +22,65 @@ class ReactionBar extends StatelessWidget {
     this.isDense = false,
   });
 
-  static const _emojis = ['🔥', '❤️', '💪', '👏', '😂'];
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isDense ? 0 : 12, vertical: 8),
-      child: Row(
-        children: [
-          ..._emojis.map((emoji) {
-            final count = checkIn.reactionCounts[emoji] ?? 0;
-            return _ReactionButton(
-              emoji: emoji,
-              count: count,
-              onTap: () => controller.toggleReaction(checkIn.id, emoji),
-              isDense: isDense,
-            );
-          }),
-          // Botão para abrir o seletor
-          _AddReactionButton(
-            onTap: () => _showReactionPicker(context),
-            isDense: isDense,
-          ),
-          const Spacer(),
-          // Botão de Comentários
-          _CommentButton(count: checkIn.commentCount, isDense: isDense),
-        ],
-      ),
-    );
+    return Watch((context) {
+      final myEmoji = controller.myReactionsByCheckIn.watch(
+        context,
+      )[checkIn.id];
+
+      final activeReactions = checkIn.reactionCounts.entries
+          .where((e) => e.value > 0)
+          .toList();
+
+      return Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: isDense ? 0 : 12,
+          vertical: 8,
+        ),
+        child: Row(
+          children: [
+            if (activeReactions.isEmpty)
+              _ZeroStateReactionButton(
+                onTap: () => _showReactionPicker(context),
+                isDense: isDense,
+              )
+            else ...[
+              ...activeReactions.map(
+                (entry) => _ReactionButton(
+                  emoji: entry.key,
+                  count: entry.value,
+                  isMyReaction: entry.key == myEmoji,
+                  onTap: () => controller.toggleReaction(checkIn.id, entry.key),
+                  isDense: isDense,
+                ),
+              ),
+              _AddReactionButton(
+                onTap: () => _showReactionPicker(context),
+                isDense: isDense,
+              ),
+            ],
+            const Spacer(),
+            _CommentButton(count: checkIn.commentCount, isDense: isDense),
+          ],
+        ),
+      );
+    });
   }
 
-  void _showReactionPicker(BuildContext context) {
+  Future<void> _showReactionPicker(BuildContext context) async {
+    if (Platform.isIOS) {
+      final hasKeyboard = await KeyboardEmojiPicker().checkHasEmojiKeyboard();
+      if (hasKeyboard) {
+        final emoji = await KeyboardEmojiPicker().pickEmoji();
+        if (emoji != null) {
+          controller.toggleReaction(checkIn.id, emoji);
+        }
+        return;
+      }
+    }
+
+    if (!context.mounted) return;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -109,6 +141,30 @@ class ReactionBar extends StatelessWidget {
   }
 }
 
+class _ZeroStateReactionButton extends StatelessWidget {
+  final VoidCallback onTap;
+  final bool isDense;
+
+  const _ZeroStateReactionButton({required this.onTap, required this.isDense});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Icon(
+          LucideIcons.smilePlus,
+          size: isDense ? 18 : 20,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+        ),
+      ),
+    );
+  }
+}
+
 class _AddReactionButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDense;
@@ -124,7 +180,7 @@ class _AddReactionButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Icon(
-          LucideIcons.plus,
+          LucideIcons.smilePlus,
           size: isDense ? 14 : 16,
           color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
         ),
@@ -136,12 +192,14 @@ class _AddReactionButton extends StatelessWidget {
 class _ReactionButton extends StatelessWidget {
   final String emoji;
   final int count;
+  final bool isMyReaction;
   final VoidCallback onTap;
   final bool isDense;
 
   const _ReactionButton({
     required this.emoji,
     required this.count,
+    required this.isMyReaction,
     required this.onTap,
     required this.isDense,
   });
@@ -150,25 +208,46 @@ class _ReactionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: isDense ? 6 : 8, vertical: 4),
-        child: Row(
-          children: [
-            Text(emoji, style: TextStyle(fontSize: isDense ? 14 : 16)),
-            if (count > 0) ...[
-              const SizedBox(width: 4),
-              Text(
-                count.toString(),
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isDense ? 6 : 8,
+            vertical: 4,
+          ),
+          decoration: BoxDecoration(
+            color: isMyReaction
+                ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: isMyReaction
+                ? Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                    width: 1.5,
+                  )
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(emoji, style: TextStyle(fontSize: isDense ? 14 : 16)),
+              if (count > 0) ...[
+                const SizedBox(width: 4),
+                Text(
+                  count.toString(),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isMyReaction
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

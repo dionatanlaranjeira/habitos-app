@@ -51,7 +51,6 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
     if (!mounted) return;
     _commentController.clear();
     FocusScope.of(context).unfocus();
-    widget.controller.loadComments(widget.checkinId);
   }
 
   @override

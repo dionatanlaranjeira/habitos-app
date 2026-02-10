@@ -134,7 +134,7 @@ class GroupController with GroupVariables {
   }
 
   Future<void> _loadCheckIns({bool silent = false}) async {
-    // Meus check-ins do dia
+    // 1. Meus check-ins do dia
     if (_userId != null) {
       await FutureHandler<List<CheckInModel>>(
         asyncState: myCheckInsAS,
@@ -146,7 +146,7 @@ class GroupController with GroupVariables {
       ).call(showLoading: !silent);
     }
 
-    // Todos os check-ins do dia (para ranking e visibilidade)
+    // 2. Todos os check-ins do dia (para ranking e visibilidade)
     await FutureHandler<List<CheckInModel>>(
       asyncState: allCheckInsAS,
       futureFunction: _checkInRepository.getCheckInsByDate(
@@ -154,6 +154,30 @@ class GroupController with GroupVariables {
         date: _dateString,
       ),
     ).call(showLoading: !silent);
+
+    // 3. Sincronizar minhas reações para otimismo preciso
+    if (_userId != null) {
+      try {
+        final reactions = await _interactionRepository
+            .getReactionsByUserAndDate(
+              groupId: _groupId,
+              userId: _userId!,
+              date: _dateString,
+            );
+
+        final Map<String, String?> reactionMap = {};
+        for (var r in reactions) {
+          final checkinId = r.checkinId;
+          if (checkinId != null) {
+            // Um user só tem uma reação por check-in
+            reactionMap[checkinId] = r.emoji;
+          }
+        }
+        myReactionsByCheckIn.value = reactionMap;
+      } catch (e) {
+        Log.error('Erro ao sincronizar reações do usuário', error: e);
+      }
+    }
   }
 
   bool isHabitCheckedIn(String habitId) {
@@ -165,9 +189,30 @@ class GroupController with GroupVariables {
     final checkIns = myCheckInsAS.value.value ?? [];
     try {
       return checkIns.firstWhere((c) => c.habitId == habitId);
-    } catch (_) {
+    } catch (e) {
       return null;
     }
+  }
+
+  /// Check-ins de um membro específico no dia
+  List<CheckInModel> getCheckInsForMember(String userId) {
+    final checkIns = allCheckInsAS.value.value ?? [];
+    return checkIns.where((c) => c.userId == userId).toList();
+  }
+
+  // Hábitos de um membro no dia
+  List<String> getCompletedHabitIdsForMember(String userId) {
+    return getCheckInsForMember(userId).map((c) => c.habitId).toList();
+  }
+
+  // Nomes dos hábitos de um membro no dia
+  List<String> getCompletedHabitNamesForMember(String userId) {
+    final habitIds = getCompletedHabitIdsForMember(userId);
+    final habits = habitLibraryAS.value.value ?? [];
+    return habitIds.map((id) {
+      final habit = habits.where((h) => h.id == id).firstOrNull;
+      return habit?.name ?? id;
+    }).toList();
   }
 
   void setPhotoForHabit(String habitId, File photo) {
@@ -263,51 +308,121 @@ class GroupController with GroupVariables {
   Future<void> toggleReaction(String checkinId, String emoji) async {
     if (_userId == null) return;
 
-    try {
-      await _interactionRepository.toggleReaction(
+    final currentData = allCheckInsAS.peek().value;
+    if (currentData == null) return;
+
+    // --- LÓGICA OTIMISTA ---
+    final previousEmoji = myReactionsByCheckIn[checkinId];
+    final isSameEmoji = previousEmoji == emoji;
+
+    // 1. Atualizar rastreio local
+    myReactionsByCheckIn[checkinId] = isSameEmoji ? null : emoji;
+
+    // 2. Atualizar contagem no sinal allCheckInsAS
+    final newList = currentData.map((c) {
+      if (c.id == checkinId) {
+        final newCounts = Map<String, int>.from(c.reactionCounts);
+
+        // Decrementar emoji antigo (se estava reagido com outro)
+        if (previousEmoji != null) {
+          newCounts[previousEmoji] = ((newCounts[previousEmoji] ?? 0) - 1)
+              .clamp(0, 999);
+        }
+
+        // Incrementar novo (se não é o mesmo — se é o mesmo, só removeu)
+        if (!isSameEmoji) {
+          newCounts[emoji] = (newCounts[emoji] ?? 0) + 1;
+        }
+
+        return c.copyWith(reactionCounts: newCounts);
+      }
+      return c;
+    }).toList();
+
+    allCheckInsAS.value = AsyncData(newList);
+    // ------------------------
+
+    FutureHandler<void>(
+      asyncState: socialWriteAS,
+      futureFunction: _interactionRepository.toggleReaction(
         groupId: _groupId,
         checkinId: checkinId,
         userId: _userId!,
         emoji: emoji,
-      );
-      // Recarregar para garantir sincronia real (silenciosamente)
-      _loadCheckIns(silent: true);
-    } catch (e, s) {
-      Log.error('Erro ao alternar reação', error: e, stackTrace: s);
-      _loadCheckIns(silent: true);
-    }
+      ),
+      catchError: (e, s) =>
+          Log.error('Erro ao alternar reação', error: e, stackTrace: s),
+    ).call(showLoading: false);
   }
 
   Future<void> addComment(String checkinId, String text) async {
     if (_userId == null || text.trim().isEmpty) return;
 
-    try {
-      await _interactionRepository.addComment(
+    final currentData = allCheckInsAS.peek().value;
+    if (currentData != null) {
+      // OTIMISTA: Incrementar contador de comentários
+      final newList = currentData.map((c) {
+        if (c.id == checkinId) {
+          return c.copyWith(commentCount: (c.commentCount + 1));
+        }
+        return c;
+      }).toList();
+      allCheckInsAS.value = AsyncData(newList);
+
+      // OTIMISTA: Injetar comentário na lista local
+      final currentComments = checkinCommentsAS.peek().value ?? [];
+      final tempComment = CommentModel(
+        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        userId: _userId!,
+        text: text.trim(),
+        createdAt: DateTime.now(),
+      );
+      checkinCommentsAS.value = AsyncData([...currentComments, tempComment]);
+    }
+
+    FutureHandler<void>(
+      asyncState: socialWriteAS,
+      futureFunction: _interactionRepository.addComment(
         groupId: _groupId,
         checkinId: checkinId,
         userId: _userId!,
         text: text.trim(),
-      );
-      // Recarregar check-ins para atualizar contadores denormalizados (silenciosamente)
-      _loadCheckIns(silent: true);
-    } catch (e, s) {
-      Log.error('Erro ao adicionar comentário', error: e, stackTrace: s);
-      Messages.error('Erro ao enviar comentário.');
-    }
+      ),
+      catchError: (e, s) =>
+          Log.error('Erro ao adicionar comentário', error: e, stackTrace: s),
+    ).call(showLoading: false);
   }
 
   Future<void> deleteComment(String checkinId, String commentId) async {
-    try {
-      await _interactionRepository.deleteComment(
+    final currentData = allCheckInsAS.peek().value;
+    if (currentData != null) {
+      // OTIMISTA: Decrementar contador de comentários
+      final newList = currentData.map((c) {
+        if (c.id == checkinId) {
+          return c.copyWith(commentCount: (c.commentCount - 1).clamp(0, 999));
+        }
+        return c;
+      }).toList();
+      allCheckInsAS.value = AsyncData(newList);
+
+      // OTIMISTA: Remover comentário da lista local
+      final currentComments = checkinCommentsAS.peek().value ?? [];
+      final newListComments = currentComments
+          .where((c) => c.id != commentId)
+          .toList();
+      checkinCommentsAS.value = AsyncData(newListComments);
+    }
+
+    FutureHandler<void>(
+      asyncState: socialWriteAS,
+      futureFunction: _interactionRepository.deleteComment(
         groupId: _groupId,
         checkinId: checkinId,
         commentId: commentId,
-      );
-      // Recarregar check-ins (silenciosamente)
-      _loadCheckIns(silent: true);
-    } catch (e, s) {
-      Log.error('Erro ao deletar comentário', error: e, stackTrace: s);
-    }
+      ),
+      catchError: (e, s) =>
+          Log.error('Erro ao deletar comentário', error: e, stackTrace: s),
+    ).call(showLoading: false);
   }
 
   Future<List<CommentModel>> getComments(String checkinId) {

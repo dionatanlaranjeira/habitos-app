@@ -51,6 +51,7 @@ dependencies:
   firebase_storage: ^12.4.10
   image_picker: ^1.2.1
   image: ^4.7.2
+  keyboard_emoji_picker: ^1.0.3
 
 
 dev_dependencies:

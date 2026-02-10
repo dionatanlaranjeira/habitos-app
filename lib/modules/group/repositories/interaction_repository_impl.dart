@@ -22,25 +22,30 @@ class InteractionRepositoryImpl implements InteractionRepository {
       groupId,
     ).doc(checkinId).collection('reactions');
 
-    // Query to check if reaction already exists
-    final snapshot = await reactionsRef
+    // Buscar TODAS as reações do usuário neste check-in
+    final existingSnapshot = await reactionsRef
         .where('userId', isEqualTo: userId)
-        .where('emoji', isEqualTo: emoji)
-        .limit(1)
         .get();
 
-    if (snapshot.docs.isNotEmpty) {
-      // Delete existing reaction
-      await snapshot.docs.first.reference.delete();
-    } else {
-      // Add new reaction
+    final existingEmoji = existingSnapshot.docs.isNotEmpty
+        ? existingSnapshot.docs.first.data()['emoji'] as String?
+        : null;
+
+    // 1. Deletar reação existente (se houver)
+    for (final doc in existingSnapshot.docs) {
+      await doc.reference.delete();
+    }
+
+    // 2. Se é um emoji diferente do atual, adicionar novo
+    // Se é o mesmo emoji, apenas removeu (untoggle)
+    if (emoji != existingEmoji) {
       await reactionsRef.add({
         'userId': userId,
         'emoji': emoji,
         'createdAt': FieldValue.serverTimestamp(),
       });
     }
-    // Counter denormalization is handled by Cloud Functions
+    // Counter denormalization is handled by Cloud Functions triggers
   }
 
   @override
@@ -98,5 +103,39 @@ class InteractionRepositoryImpl implements InteractionRepository {
     return snapshot.docs
         .map((doc) => CommentModel.fromFirestore(doc.id, doc.data()))
         .toList();
+  }
+
+  @override
+  Future<List<ReactionModel>> getReactionsByUserAndDate({
+    required String groupId,
+    required String userId,
+    required String date,
+  }) async {
+    // Note: For a real production app, we would add 'date' to the reaction document
+    // to make this query efficient via collectionGroup.
+    // For now, we fetch the check-ins for that date first, then their reactions.
+    final checkinsSnapshot = await _checkinsRef(
+      groupId,
+    ).where('date', isEqualTo: date).get();
+
+    final List<ReactionModel> allUserReactions = [];
+
+    for (var checkinDoc in checkinsSnapshot.docs) {
+      final reactionSnapshot = await checkinDoc.reference
+          .collection('reactions')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      for (var reactionDoc in reactionSnapshot.docs) {
+        allUserReactions.add(
+          ReactionModel.fromFirestore(reactionDoc.id, {
+            ...reactionDoc.data(),
+            'checkinId': checkinDoc.id,
+          }),
+        );
+      }
+    }
+
+    return allUserReactions;
   }
 }

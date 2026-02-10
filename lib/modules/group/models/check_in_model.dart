@@ -60,4 +60,24 @@ class CheckInModel {
     'reactionCounts': reactionCounts,
     'commentCount': commentCount,
   };
+
+  CheckInModel copyWith({
+    String? description,
+    int? points,
+    Map<String, int>? reactionCounts,
+    int? commentCount,
+  }) {
+    return CheckInModel(
+      id: id,
+      userId: userId,
+      habitId: habitId,
+      date: date,
+      photoUrl: photoUrl,
+      completedAt: completedAt,
+      description: description ?? this.description,
+      points: points ?? this.points,
+      reactionCounts: reactionCounts ?? this.reactionCounts,
+      commentCount: commentCount ?? this.commentCount,
+    );
+  }
 }
