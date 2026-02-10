@@ -18,9 +18,9 @@ class HomeFab extends StatelessWidget {
   void _showOptionsSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      backgroundColor: Colors.transparent,
+      useSafeArea: false,
+      isScrollControlled: true,
       builder: (_) => FabOptionsSheet(controller: controller),
     );
   }

@@ -13,84 +13,89 @@ class CreateGroupSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        24,
-        24,
-        24 + MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Form(
-        key: formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: context.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          24 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: context.colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            Text(
-              'Criar grupo',
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+              Text(
+                'Criar grupo',
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Escolha um nome para o seu grupo de competição.',
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
+              const SizedBox(height: 8),
+              Text(
+                'Escolha um nome para o seu grupo de competição.',
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            DefaultInputField(
-              controller: controller.groupNameController,
-              label: 'Nome do grupo',
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Informe o nome do grupo';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
+              DefaultInputField(
+                controller: controller.groupNameController,
+                label: 'Nome do grupo',
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Informe o nome do grupo';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
 
-            Watch((_) {
-              final isLoading = controller.createGroupSignal.value.isLoading;
-              return FilledButton(
-                onPressed: isLoading
-                    ? null
-                    : () {
-                        if (formKey.currentState?.validate() ?? false) {
-                          controller.createGroup().then((_) {
-                            if (context.mounted) Navigator.of(context).pop();
-                          });
-                        }
-                      },
-                child: isLoading
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text('Criar'),
-              );
-            }),
-          ],
+              Watch((_) {
+                final isLoading = controller.createGroupSignal.value.isLoading;
+                return FilledButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          if (formKey.currentState?.validate() ?? false) {
+                            controller.createGroup().then((_) {
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            });
+                          }
+                        },
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Criar'),
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );

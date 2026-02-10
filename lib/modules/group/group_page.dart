@@ -21,6 +21,7 @@ class GroupPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
         title: Watch((context) {
           final group = controller.groupAS.watch(context).value;
           return Text(group?.name ?? '');

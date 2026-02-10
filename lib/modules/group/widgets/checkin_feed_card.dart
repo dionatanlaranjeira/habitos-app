@@ -31,7 +31,7 @@ class CheckinFeedCard extends StatelessWidget {
       onTap: () => showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        useSafeArea: true,
+        useSafeArea: false,
         backgroundColor: Colors.transparent,
         builder: (_) => CheckinDetailSheet(
           checkinId: checkIn.id,

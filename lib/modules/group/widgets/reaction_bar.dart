@@ -85,55 +85,61 @@ class ReactionBar extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useSafeArea: false,
       builder: (context) {
         final theme = Theme.of(context);
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.45,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+        return SafeArea(
+          top: false,
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.45,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-              Expanded(
-                child: EmojiPicker(
-                  onEmojiSelected: (category, emoji) {
-                    controller.toggleReaction(checkIn.id, emoji.emoji);
-                    Navigator.pop(context);
-                  },
-                  config: Config(
-                    height: 256,
-                    checkPlatformCompatibility: true,
-                    viewOrderConfig: const ViewOrderConfig(),
-                    emojiViewConfig: EmojiViewConfig(
-                      backgroundColor: theme.colorScheme.surface,
-                      columns: 7,
-                      emojiSizeMax:
-                          32 *
-                          (foundation.defaultTargetPlatform ==
-                                  TargetPlatform.iOS
-                              ? 1.30
-                              : 1.0),
-                    ),
-                    categoryViewConfig: CategoryViewConfig(
-                      backgroundColor: theme.colorScheme.surface,
-                      indicatorColor: theme.colorScheme.primary,
-                      iconColorSelected: theme.colorScheme.primary,
-                      backspaceColor: theme.colorScheme.primary,
+            ),
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Expanded(
+                  child: EmojiPicker(
+                    onEmojiSelected: (category, emoji) {
+                      controller.toggleReaction(checkIn.id, emoji.emoji);
+                      Navigator.pop(context);
+                    },
+                    config: Config(
+                      height: 256,
+                      checkPlatformCompatibility: true,
+                      viewOrderConfig: const ViewOrderConfig(),
+                      emojiViewConfig: EmojiViewConfig(
+                        backgroundColor: theme.colorScheme.surface,
+                        columns: 7,
+                        emojiSizeMax:
+                            32 *
+                            (foundation.defaultTargetPlatform ==
+                                    TargetPlatform.iOS
+                                ? 1.30
+                                : 1.0),
+                      ),
+                      categoryViewConfig: CategoryViewConfig(
+                        backgroundColor: theme.colorScheme.surface,
+                        indicatorColor: theme.colorScheme.primary,
+                        iconColorSelected: theme.colorScheme.primary,
+                        backspaceColor: theme.colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

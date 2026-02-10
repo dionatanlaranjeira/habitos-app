@@ -153,6 +153,7 @@ class HabitCheckinTile extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: false,
       backgroundColor: Colors.transparent,
       builder: (_) => CheckinFormSheet(
         habitId: habit.id,

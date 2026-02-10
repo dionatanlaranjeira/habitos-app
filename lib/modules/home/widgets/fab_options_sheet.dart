@@ -11,46 +11,53 @@ class FabOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
+    return Container(
+      decoration: BoxDecoration(
+        color: context.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // Opção: Criar grupo
-            _OptionTile(
-              icon: Icons.group_add_rounded,
-              title: 'Criar grupo',
-              subtitle: 'Comece um novo campeonato',
-              onTap: () {
-                Navigator.of(context).pop();
-                AppRouter.router.push(CreateGroupModule.path);
-              },
-            ),
-            const SizedBox(height: 12),
+              // Opção: Criar grupo
+              _OptionTile(
+                icon: Icons.group_add_rounded,
+                title: 'Criar grupo',
+                subtitle: 'Comece um novo campeonato',
+                onTap: () {
+                  Navigator.of(context).pop();
+                  AppRouter.router.push(CreateGroupModule.path);
+                },
+              ),
+              const SizedBox(height: 12),
 
-            // Opção: Entrar com código
-            _OptionTile(
-              icon: Icons.login_rounded,
-              title: 'Entrar com código',
-              subtitle: 'Junte-se a um grupo existente',
-              onTap: () {
-                Navigator.of(context).pop();
-                showJoinGroupSheet(context, controller);
-              },
-            ),
-          ],
+              // Opção: Entrar com código
+              _OptionTile(
+                icon: Icons.login_rounded,
+                title: 'Entrar com código',
+                subtitle: 'Junte-se a um grupo existente',
+                onTap: () {
+                  Navigator.of(context).pop();
+                  showJoinGroupSheet(context, controller);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
