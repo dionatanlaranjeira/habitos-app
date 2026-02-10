@@ -30,6 +30,11 @@ class GroupModule extends ProviderModule {
                 storageRepository: context.read<StorageRepository>(),
               ),
             ),
+            Provider<InteractionRepository>(
+              create: (context) => InteractionRepositoryImpl(
+                firestore: context.read<FirestoreAdapter>().instance,
+              ),
+            ),
             Provider<GroupController>(
               create: (context) => GroupController(
                 groupId: groupId,
@@ -37,6 +42,7 @@ class GroupModule extends ProviderModule {
                 checkInRepository: context.read<CheckInRepository>(),
                 habitRepository: context.read<HabitRepository>(),
                 userRepository: context.read<UserRepository>(),
+                interactionRepository: context.read<InteractionRepository>(),
                 authStore: context.read<AuthStore>(),
               ),
             ),

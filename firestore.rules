@@ -40,6 +40,32 @@ service cloud.firestore {
 
         allow create: if request.auth != null
           && request.auth.uid == request.resource.data.userId;
+
+        // Subcoleção de reações
+        match /reactions/{reactionId} {
+          allow read: if request.auth != null
+            && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+          
+          allow create: if request.auth != null
+            && request.auth.uid == request.resource.data.userId
+            && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+
+          allow delete: if request.auth != null
+            && request.auth.uid == resource.data.userId;
+        }
+
+        // Subcoleção de comentários
+        match /comments/{commentId} {
+          allow read: if request.auth != null
+            && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+          
+          allow create: if request.auth != null
+            && request.auth.uid == request.resource.data.userId
+            && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+
+          allow delete: if request.auth != null
+            && request.auth.uid == resource.data.userId;
+        }
       }
     }
 

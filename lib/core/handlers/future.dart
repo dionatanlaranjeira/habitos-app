@@ -15,8 +15,11 @@ class FutureHandler<T> {
     this.catchError,
   });
 
-  Future<void> call() async {
-    asyncState.value = AsyncLoading<T>();
+  Future<void> call({bool showLoading = true}) async {
+    if (showLoading) {
+      asyncState.value = AsyncLoading<T>();
+    }
+
     await futureFunction
         .then((T response) async {
           asyncState.value = AsyncData(response);

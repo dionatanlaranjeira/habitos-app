@@ -24,12 +24,16 @@ class GroupController with GroupVariables {
     required CheckInRepository checkInRepository,
     required HabitRepository habitRepository,
     required UserRepository userRepository,
+    required InteractionRepository
+    interactionRepository, // Added to constructor
     required AuthStore authStore,
   }) : _groupId = groupId,
        _groupRepository = groupRepository,
        _checkInRepository = checkInRepository,
        _habitRepository = habitRepository,
        _userRepository = userRepository,
+       _interactionRepository =
+           interactionRepository, // Added to initializer list
        _authStore = authStore {
     _init();
   }
@@ -39,8 +43,10 @@ class GroupController with GroupVariables {
   final CheckInRepository _checkInRepository;
   final HabitRepository _habitRepository;
   final UserRepository _userRepository;
+  final InteractionRepository _interactionRepository;
   final AuthStore _authStore;
 
+  AuthStore get authStore => _authStore;
   String? get _userId => _authStore.user?.uid;
 
   String get _dateString => DateFormat('yyyy-MM-dd').format(selectedDate.value);
@@ -127,7 +133,7 @@ class GroupController with GroupVariables {
     ).call();
   }
 
-  Future<void> _loadCheckIns() async {
+  Future<void> _loadCheckIns({bool silent = false}) async {
     // Meus check-ins do dia
     if (_userId != null) {
       await FutureHandler<List<CheckInModel>>(
@@ -137,7 +143,7 @@ class GroupController with GroupVariables {
           userId: _userId!,
           date: _dateString,
         ),
-      ).call();
+      ).call(showLoading: !silent);
     }
 
     // Todos os check-ins do dia (para ranking e visibilidade)
@@ -147,7 +153,7 @@ class GroupController with GroupVariables {
         groupId: _groupId,
         date: _dateString,
       ),
-    ).call();
+    ).call(showLoading: !silent);
   }
 
   bool isHabitCheckedIn(String habitId) {
@@ -250,5 +256,71 @@ class GroupController with GroupVariables {
 
   Future<void> refresh() async {
     _init();
+  }
+
+  // --- INTERAÇÕES ---
+
+  Future<void> toggleReaction(String checkinId, String emoji) async {
+    if (_userId == null) return;
+
+    try {
+      await _interactionRepository.toggleReaction(
+        groupId: _groupId,
+        checkinId: checkinId,
+        userId: _userId!,
+        emoji: emoji,
+      );
+      // Recarregar para garantir sincronia real (silenciosamente)
+      _loadCheckIns(silent: true);
+    } catch (e, s) {
+      Log.error('Erro ao alternar reação', error: e, stackTrace: s);
+      _loadCheckIns(silent: true);
+    }
+  }
+
+  Future<void> addComment(String checkinId, String text) async {
+    if (_userId == null || text.trim().isEmpty) return;
+
+    try {
+      await _interactionRepository.addComment(
+        groupId: _groupId,
+        checkinId: checkinId,
+        userId: _userId!,
+        text: text.trim(),
+      );
+      // Recarregar check-ins para atualizar contadores denormalizados (silenciosamente)
+      _loadCheckIns(silent: true);
+    } catch (e, s) {
+      Log.error('Erro ao adicionar comentário', error: e, stackTrace: s);
+      Messages.error('Erro ao enviar comentário.');
+    }
+  }
+
+  Future<void> deleteComment(String checkinId, String commentId) async {
+    try {
+      await _interactionRepository.deleteComment(
+        groupId: _groupId,
+        checkinId: checkinId,
+        commentId: commentId,
+      );
+      // Recarregar check-ins (silenciosamente)
+      _loadCheckIns(silent: true);
+    } catch (e, s) {
+      Log.error('Erro ao deletar comentário', error: e, stackTrace: s);
+    }
+  }
+
+  Future<List<CommentModel>> getComments(String checkinId) {
+    return _interactionRepository.getComments(
+      groupId: _groupId,
+      checkinId: checkinId,
+    );
+  }
+
+  Future<void> loadComments(String checkinId) async {
+    await FutureHandler<List<CommentModel>>(
+      asyncState: checkinCommentsAS,
+      futureFunction: getComments(checkinId),
+    ).call();
   }
 }

@@ -9,6 +9,8 @@ class CheckInModel {
   final String description;
   final DateTime completedAt;
   final int points;
+  final Map<String, int> reactionCounts;
+  final int commentCount;
 
   const CheckInModel({
     required this.id,
@@ -19,10 +21,18 @@ class CheckInModel {
     required this.completedAt,
     this.description = '',
     this.points = 1,
+    this.reactionCounts = const {},
+    this.commentCount = 0,
   });
 
   factory CheckInModel.fromFirestore(String id, Map<String, dynamic> data) {
     final completedAt = data['completedAt'];
+    final reactionCountsRaw =
+        data['reactionCounts'] as Map<String, dynamic>? ?? {};
+    final reactionCounts = reactionCountsRaw.map(
+      (key, value) => MapEntry(key, value as int),
+    );
+
     return CheckInModel(
       id: id,
       userId: data['userId'] as String? ?? '',
@@ -34,6 +44,8 @@ class CheckInModel {
           ? completedAt.toDate()
           : DateTime.now(),
       points: data['points'] as int? ?? 1,
+      reactionCounts: reactionCounts,
+      commentCount: data['commentCount'] as int? ?? 0,
     );
   }
 
@@ -45,5 +57,7 @@ class CheckInModel {
     'description': description,
     'completedAt': Timestamp.fromDate(completedAt),
     'points': points,
+    'reactionCounts': reactionCounts,
+    'commentCount': commentCount,
   };
 }

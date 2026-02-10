@@ -233,6 +233,7 @@ class GroupPage extends StatelessWidget {
                     memberName: memberName,
                     habitName: habitDetail.name,
                     habitIcon: habitDetail.iconData,
+                    controller: controller,
                   );
                 },
               );
