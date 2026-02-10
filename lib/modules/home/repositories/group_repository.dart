@@ -1,4 +1,5 @@
 import '../models/group_model.dart';
+import '../models/group_member_model.dart';
 
 abstract class GroupRepository {
   Future<GroupModel> createGroup({
@@ -31,4 +32,8 @@ abstract class GroupRepository {
     required String groupId,
     required String userId,
   });
+
+  Future<GroupModel?> getGroupById(String groupId);
+
+  Future<List<GroupMemberModel>> getGroupMembers(String groupId);
 }

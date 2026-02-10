@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../core/core.dart';
+import '../models/group_member_model.dart';
 import '../models/group_model.dart';
 import 'group_repository.dart';
 
@@ -143,6 +144,21 @@ class GroupRepositoryImpl implements GroupRepository {
       return habits.map((e) => e.toString()).toList();
     }
     return [];
+  }
+
+  @override
+  Future<GroupModel?> getGroupById(String groupId) async {
+    final doc = await _ref.doc(groupId).get();
+    if (!doc.exists || doc.data() == null) return null;
+    return GroupModel.fromFirestore(doc.id, doc.data()!);
+  }
+
+  @override
+  Future<List<GroupMemberModel>> getGroupMembers(String groupId) async {
+    final snapshot = await _ref.doc(groupId).collection('members').get();
+    return snapshot.docs
+        .map((doc) => GroupMemberModel.fromFirestore(doc.id, doc.data()))
+        .toList();
   }
 
   String _generateCode() {

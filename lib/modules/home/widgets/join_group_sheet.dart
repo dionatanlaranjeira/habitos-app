@@ -4,15 +4,20 @@ import 'package:signals/signals_flutter.dart';
 import '../../../shared/shared.dart';
 import '../home.dart';
 
-class JoinGroupSheet extends StatelessWidget {
+class JoinGroupSheet extends StatefulWidget {
   const JoinGroupSheet({super.key, required this.controller});
 
   final HomeController controller;
 
   @override
-  Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
+  State<JoinGroupSheet> createState() => _JoinGroupSheetState();
+}
 
+class _JoinGroupSheetState extends State<JoinGroupSheet> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         24,
@@ -21,7 +26,7 @@ class JoinGroupSheet extends StatelessWidget {
         24 + MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Form(
-        key: formKey,
+        key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -55,9 +60,10 @@ class JoinGroupSheet extends StatelessWidget {
             const SizedBox(height: 24),
 
             DefaultInputField(
-              controller: controller.groupCodeController,
+              controller: widget.controller.groupCodeController,
               label: 'Código do grupo',
               hint: 'Ex: ABC123',
+              autofocus: true,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Informe o código do grupo';
@@ -68,13 +74,14 @@ class JoinGroupSheet extends StatelessWidget {
             const SizedBox(height: 24),
 
             Watch((_) {
-              final isLoading = controller.joinGroupSignal.value.isLoading;
+              final isLoading =
+                  widget.controller.joinGroupSignal.value.isLoading;
               return FilledButton(
                 onPressed: isLoading
                     ? null
                     : () {
-                        if (formKey.currentState?.validate() ?? false) {
-                          controller.joinGroup().then((_) {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          widget.controller.joinGroup().then((_) {
                             if (context.mounted) Navigator.of(context).pop();
                           });
                         }

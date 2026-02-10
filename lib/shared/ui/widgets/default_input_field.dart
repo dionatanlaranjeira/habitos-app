@@ -27,6 +27,7 @@ class DefaultInputField extends StatelessWidget {
   final FieldValidationHandler? validatorHandler;
   final String? validationField;
   final void Function(String value)? onChanged;
+  final bool autofocus;
 
   DefaultInputField({
     super.key,
@@ -46,6 +47,7 @@ class DefaultInputField extends StatelessWidget {
     this.labelColor,
     this.showShadow = true,
     this.autoValidateMode,
+    this.autofocus = false,
 
     // Validação manual
     this.validator,

@@ -45,5 +45,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Precisamos da câmera para comprovar seus hábitos com foto</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Acesse a galeria para enviar comprovação dos seus hábitos</string>
 </dict>
 </plist>
