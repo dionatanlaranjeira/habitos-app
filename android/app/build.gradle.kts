@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.habitos"
+    namespace = "com.habitus"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -23,7 +23,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.habitos"
+        applicationId = "com.habitus"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

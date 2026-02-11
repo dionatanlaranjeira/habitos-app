@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDEbBDC0jY6xp1xSMxz-FYq8jvsIb6J14k',
-    appId: '1:1008207391772:android:0c7e0b51cbc342aeff83d9',
+    appId: '1:1008207391772:android:acd0503715dd4ba4ff83d9',
     messagingSenderId: '1008207391772',
     projectId: 'habitos-app-1b86b',
     storageBucket: 'habitos-app-1b86b.firebasestorage.app',
@@ -59,11 +59,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBYYLjYAQhSqBXPp9mJNyUbSNi2qffU314',
-    appId: '1:1008207391772:ios:d6ca7e744235e451ff83d9',
+    appId: '1:1008207391772:ios:b23c4d826787e5c4ff83d9',
     messagingSenderId: '1008207391772',
     projectId: 'habitos-app-1b86b',
     storageBucket: 'habitos-app-1b86b.firebasestorage.app',
-    iosClientId: '1008207391772-5cauo1nddukgm20ng873fv51u77imfmj.apps.googleusercontent.com',
-    iosBundleId: 'com.habitos',
+    iosClientId: '1008207391772-6n4inpasep7pobeblamn22nutmmbajbv.apps.googleusercontent.com',
+    iosBundleId: 'com.habitus',
   );
+
 }

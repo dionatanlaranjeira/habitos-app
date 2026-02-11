@@ -58,7 +58,7 @@ class _AppRouterScopeState extends State<AppRouterScope> {
           theme: widget.lightTheme,
           darkTheme: widget.darkTheme,
           debugShowCheckedModeBanner: false,
-          title: 'Hábitos',
+          title: "Habitus",
           locale: localeStore.locale.value,
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,

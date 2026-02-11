@@ -24,7 +24,7 @@ class SplashPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Hábitos',
+              'Habitus',
               style: context.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: context.primaryColor,
