@@ -22,9 +22,9 @@ class AppRouter {
       create: (ctx) =>
           UserRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
     ),
-    Provider<GroupRepository>(
+    Provider<HomeRepository>(
       create: (ctx) =>
-          GroupRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
+          HomeRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
     ),
     Provider<HabitRepository>(
       create: (ctx) =>
@@ -35,10 +35,9 @@ class AppRouter {
           CategoryRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
     ),
     Provider<LocaleStore>(create: (_) => LocaleStore(ApplicationConfig.prefs)),
-    Provider<AuthStore>(create: (ctx) => AuthStore(ctx.read<AuthRepository>())),
     Provider<UserStore>(
       create: (ctx) =>
-          UserStore(ctx.read<UserRepository>(), ctx.read<AuthStore>()),
+          UserStore(ctx.read<AuthRepository>(), ctx.read<UserRepository>()),
     ),
   ];
 }

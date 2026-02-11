@@ -27,6 +27,13 @@ class GroupPage extends StatelessWidget {
           return Text(group?.name ?? '');
         }),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () => GroupInfoSheet.show(context, controller),
+            icon: const Icon(LucideIcons.info),
+            tooltip: 'Informações do Grupo',
+          ),
+        ],
       ),
       body: SignalFutureBuilder<GroupModel?>(
         asyncState: controller.groupAS.watch(context),

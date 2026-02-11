@@ -1,28 +1,24 @@
 import '../../../core/core.dart';
 import '../../../shared/shared.dart';
-import '../../../global_modules/auth/stores/auth_store.dart';
+import '../../../global_modules/global_modules.dart';
 import '../../habit_selection/habit_selection.dart';
 import '../../home/models/models.dart';
-import '../../home/repositories/repositories.dart';
 import '../mixins/mixins.dart';
 import '../repositories/repositories.dart';
 
 class CreateGroupController with CreateGroupVariables {
   CreateGroupController({
-    required GroupRepository groupRepository,
     required CreateGroupRepository createGroupRepository,
-    required AuthStore authStore,
-  }) : _groupRepository = groupRepository,
-       _createGroupRepository = createGroupRepository,
-       _authStore = authStore {
+    required UserStore userStore,
+  }) : _createGroupRepository = createGroupRepository,
+       _userStore = userStore {
     _loadOptions();
   }
 
-  final GroupRepository _groupRepository;
   final CreateGroupRepository _createGroupRepository;
-  final AuthStore _authStore;
+  final UserStore _userStore;
 
-  String? get _userId => _authStore.user?.uid;
+  String? get _userId => _userStore.uid;
 
   Future<void> _loadOptions() async {
     await Future.wait([_loadGameModes(), _loadSeasonDurations()]);
@@ -82,7 +78,7 @@ class CreateGroupController with CreateGroupVariables {
 
     await FutureHandler<GroupModel?>(
       asyncState: createGroupSignal,
-      futureFunction: _groupRepository.createGroup(
+      futureFunction: _createGroupRepository.createGroup(
         name: groupNameController.text.trim(),
         ownerId: _userId!,
         seasonDuration: selectedDurationS.value!.days,
@@ -97,7 +93,7 @@ class CreateGroupController with CreateGroupVariables {
 
         AppRouter.router.go(
           HabitSelectionModule.path,
-          extra: {'groupId': group.id, 'userId': _userId},
+          extra: {'groupId': group.id},
         );
       },
       catchError: (e, s) {

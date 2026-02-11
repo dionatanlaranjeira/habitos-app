@@ -12,14 +12,14 @@ class HomeModule extends ProviderModule {
         path: path,
         page: const HomePage(),
         bindings: (_) => [
-          Provider<GroupRepository>(
+          Provider<HomeRepository>(
             create: (ctx) =>
-                GroupRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
+                HomeRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
           ),
-          Provider(
+          Provider<HomeController>(
             create: (ctx) => HomeController(
-              groupRepository: ctx.read<GroupRepository>(),
-              authStore: ctx.read<AuthStore>(),
+              homeRepository: ctx.read<HomeRepository>(),
+              userStore: ctx.read<UserStore>(),
             ),
           ),
         ],

@@ -3,32 +3,32 @@ import 'package:signals/signals_flutter.dart';
 
 import '../../../core/core.dart';
 import '../../../shared/shared.dart';
-import '../../../global_modules/auth/stores/auth_store.dart';
+import '../../../global_modules/global_modules.dart';
 import '../../habit_selection/habit_selection.dart';
 import '../../group/group_module.dart';
 import '../home.dart';
 
 class HomeController with HomeVariables {
   HomeController({
-    required GroupRepository groupRepository,
-    required AuthStore authStore,
-  }) : _groupRepository = groupRepository,
-       _authStore = authStore {
+    required HomeRepository homeRepository,
+    required UserStore userStore,
+  }) : _homeRepository = homeRepository,
+       _userStore = userStore {
     _init();
   }
 
-  final GroupRepository _groupRepository;
-  final AuthStore _authStore;
+  final HomeRepository _homeRepository;
+  final UserStore _userStore;
 
   StreamSubscription<List<GroupModel>>? _subscription;
   String? _currentUserId;
 
-  String? get _userId => _authStore.user?.uid;
+  String? get _userId => _userStore.uid;
 
   void _init() {
     // Efeito para monitorar usuário e recriar assinatura
     effect(() {
-      final uid = _authStore.user?.uid;
+      final uid = _userStore.uid;
 
       if (uid != _currentUserId) {
         _currentUserId = uid;
@@ -47,7 +47,7 @@ class HomeController with HomeVariables {
 
     groupsAS.value = AsyncLoading();
 
-    _subscription = _groupRepository
+    _subscription = _homeRepository
         .watchGroupsByUser(uid)
         .listen(
           (data) {
@@ -66,45 +66,13 @@ class HomeController with HomeVariables {
     _setupStream(_userId);
   }
 
-  Future<void> createGroup() async {
-    final name = groupNameController.text.trim();
-    if (name.isEmpty || _userId == null) return;
-
-    await FutureHandler(
-      asyncState: createGroupSignal,
-      futureFunction: _groupRepository.createGroup(
-        name: name,
-        ownerId: _userId!,
-        seasonDuration: 14,
-        gameMode: 'normal',
-        timezone: 'America/Sao_Paulo',
-      ),
-      onValue: (group) async {
-        if (group == null) return;
-        groupNameController.clear();
-
-        // Stream atualiza sozinho, apenas feedback
-        Messages.success('Grupo "${group.name}" criado!');
-
-        AppRouter.router.push(
-          HabitSelectionModule.path,
-          extra: {'groupId': group.id, 'userId': _userId},
-        );
-      },
-      catchError: (e, s) {
-        Log.error('Falha ao criar grupo', error: e, stackTrace: s);
-        Messages.error('Não foi possível criar o grupo.');
-      },
-    ).call();
-  }
-
   Future<void> joinGroup() async {
     final code = groupCodeController.text.trim().toUpperCase();
     if (code.isEmpty || _userId == null) return;
 
     await FutureHandler(
       asyncState: joinGroupSignal,
-      futureFunction: _groupRepository.joinGroupByCode(
+      futureFunction: _homeRepository.joinGroupByCode(
         code: code,
         userId: _userId!,
       ),
@@ -118,7 +86,7 @@ class HomeController with HomeVariables {
         Messages.success('Você entrou no grupo "${group.name}"!');
         AppRouter.router.push(
           HabitSelectionModule.path,
-          extra: {'groupId': group.id, 'userId': _userId},
+          extra: {'groupId': group.id},
         );
       },
       catchError: (e, s) {
@@ -132,7 +100,7 @@ class HomeController with HomeVariables {
     if (_userId == null) return;
 
     try {
-      final habits = await _groupRepository.getMemberHabits(
+      final habits = await _homeRepository.getMemberHabits(
         groupId: group.id,
         userId: _userId!,
       );
@@ -140,7 +108,7 @@ class HomeController with HomeVariables {
       if (habits.isEmpty) {
         AppRouter.router.push(
           HabitSelectionModule.path,
-          extra: {'groupId': group.id, 'userId': _userId},
+          extra: {'groupId': group.id},
         );
       } else {
         AppRouter.router.push(

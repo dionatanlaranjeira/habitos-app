@@ -5,14 +5,10 @@ import 'package:signals/signals.dart';
 
 import '../../../core/core.dart';
 import '../../../shared/shared.dart';
-import '../../../global_modules/auth/stores/auth_store.dart';
+import '../../../global_modules/global_modules.dart';
 import '../../home/models/models.dart';
-import '../../home/repositories/repositories.dart';
-
 import '../../habit_selection/models/habit_model.dart';
 import '../../habit_selection/repositories/repositories.dart';
-import '../../../global_modules/user/models/user_model.dart';
-import '../../../global_modules/user/repositories/user_repository.dart';
 import '../models/models.dart';
 import '../mixins/mixins.dart';
 import '../repositories/repositories.dart';
@@ -20,34 +16,43 @@ import '../repositories/repositories.dart';
 class GroupController with GroupVariables {
   GroupController({
     required String groupId,
-    required GroupRepository groupRepository,
+    required GroupDetailRepository groupRepository,
     required CheckInRepository checkInRepository,
     required HabitRepository habitRepository,
-    required UserRepository userRepository,
     required InteractionRepository
     interactionRepository, // Added to constructor
-    required AuthStore authStore,
+    required UserStore userStore,
   }) : _groupId = groupId,
        _groupRepository = groupRepository,
        _checkInRepository = checkInRepository,
        _habitRepository = habitRepository,
-       _userRepository = userRepository,
        _interactionRepository =
            interactionRepository, // Added to initializer list
-       _authStore = authStore {
+       _userStore = userStore {
+    // Sincroniza o nome do próprio usuário reativamente
+    effect(() {
+      final name = _userStore.name;
+      final uid = _userStore.uid;
+      if (name != null && uid != null) {
+        final currentMap = memberNamesAS.value.value ?? {};
+        if (currentMap[uid] != name) {
+          memberNamesAS.value = AsyncData({...currentMap, uid: name});
+        }
+      }
+    });
+
     _init();
   }
 
   final String _groupId;
-  final GroupRepository _groupRepository;
+  final GroupDetailRepository _groupRepository;
   final CheckInRepository _checkInRepository;
   final HabitRepository _habitRepository;
-  final UserRepository _userRepository;
   final InteractionRepository _interactionRepository;
-  final AuthStore _authStore;
+  final UserStore _userStore;
 
-  AuthStore get authStore => _authStore;
-  String? get _userId => _authStore.user?.uid;
+  UserStore get userStore => _userStore;
+  String? get _userId => _userStore.uid;
 
   String get _dateString => DateFormat('yyyy-MM-dd').format(selectedDate.value);
 
@@ -83,35 +88,37 @@ class GroupController with GroupVariables {
     await FutureHandler<List<GroupMemberModel>>(
       asyncState: membersAS,
       futureFunction: _groupRepository.getGroupMembers(_groupId),
-      onValue: (members) => _loadMemberNames(members),
+      onValue: (members) =>
+          _loadMemberNames(members.map((m) => m.userId).toList()),
     ).call();
   }
 
-  Future<void> _loadMemberNames(List<GroupMemberModel> members) async {
+  Future<void> _loadMemberNames(List<String> userIds) async {
     final Map<String, String> names = {...memberNamesAS.value.value ?? {}};
+    bool changed = false;
 
-    for (final member in members) {
-      if (names.containsKey(member.userId)) continue;
+    // Filtra IDs que ainda não temos no cache
+    final missingIds = userIds.where((id) => !names.containsKey(id)).toSet();
 
-      await FutureHandler<UserModel?>(
-        asyncState: asyncSignal(
-          AsyncLoading(),
-        ), // Sinal temporário para não afetar o principal
-        futureFunction: _userRepository.getUser(member.userId),
-        onValue: (user) {
-          if (user != null) {
-            names[member.userId] = user.name;
-          } else {
-            names[member.userId] = 'Usuário';
-          }
-        },
-        catchError: (e, s) {
-          names[member.userId] = 'Usuário';
-        },
-      ).call();
+    if (missingIds.isEmpty) return;
+
+    // Busca os nomes faltantes em paralelo
+    await Future.wait(
+      missingIds.map((id) async {
+        try {
+          final name = await _groupRepository.getUserName(id);
+          names[id] = name ?? 'Usuário';
+          changed = true;
+        } catch (e) {
+          names[id] = 'Erro';
+          changed = true;
+        }
+      }),
+    );
+
+    if (changed) {
+      memberNamesAS.value = AsyncData(names);
     }
-
-    memberNamesAS.value = AsyncData(names);
   }
 
   Future<void> _loadMyHabits() async {
@@ -153,6 +160,12 @@ class GroupController with GroupVariables {
         groupId: _groupId,
         date: _dateString,
       ),
+      onValue: (checkins) {
+        if (checkins.isNotEmpty) {
+          final userIds = checkins.map((c) => c.userId).toList();
+          _loadMemberNames(userIds);
+        }
+      },
     ).call(showLoading: !silent);
 
     // 3. Sincronizar minhas reações para otimismo preciso

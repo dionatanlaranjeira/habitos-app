@@ -5,15 +5,15 @@ import '../../login/login.dart';
 import '../splash.dart';
 
 class SplashController with SplashVariables {
-  SplashController({required AuthStore authStore}) : _authStore = authStore {
+  SplashController({required UserStore userStore}) : _userStore = userStore {
     init();
   }
 
-  final AuthStore _authStore;
+  final UserStore _userStore;
 
   Future<void> init() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    if (_authStore.isAuthenticated) {
+    if (_userStore.isAuthenticated) {
       AppRouter.router.go(HomeModule.path);
     } else {
       AppRouter.router.go(LoginModule.path);

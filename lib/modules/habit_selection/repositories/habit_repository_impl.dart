@@ -36,4 +36,33 @@ class HabitRepositoryImpl implements HabitRepository {
         .map((doc) => HabitModel.fromFirestore(doc.id, doc.data()))
         .toList();
   }
+
+  @override
+  Future<void> saveMemberHabits({
+    required String groupId,
+    required String userId,
+    required List<String> habitIds,
+  }) async {
+    final batch = _firestore.batch();
+
+    final memberRef = _firestore
+        .collection('groups')
+        .doc(groupId)
+        .collection('members')
+        .doc(userId);
+
+    batch.set(memberRef, {
+      'userId': userId,
+      'habitIds': habitIds,
+      'joinedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    // Também atualizar o array de memberIds no documento do grupo por segurança
+    final groupRef = _firestore.collection('groups').doc(groupId);
+    batch.update(groupRef, {
+      'memberIds': FieldValue.arrayUnion([userId]),
+    });
+
+    await batch.commit();
+  }
 }

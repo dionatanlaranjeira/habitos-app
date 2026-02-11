@@ -1,6 +1,6 @@
 import 'package:provider/provider.dart';
 import '../../core/core.dart';
-import '../home/repositories/repositories.dart';
+import '../../global_modules/global_modules.dart';
 import 'controllers/controllers.dart';
 import 'habit_selection_page.dart';
 import 'repositories/repositories.dart';
@@ -16,7 +16,6 @@ class HabitSelectionModule extends ProviderModule {
           // Pegando parâmetros passados via extra no GoRouter
           final extra = state.extra as Map<String, dynamic>?;
           final groupId = extra?['groupId'] ?? '';
-          final userId = extra?['userId'] ?? '';
 
           return [
             Provider<HabitRepository>(
@@ -31,9 +30,8 @@ class HabitSelectionModule extends ProviderModule {
               create: (c) => HabitSelectionController(
                 habitRepository: c.read<HabitRepository>(),
                 categoryRepository: c.read<CategoryRepository>(),
-                groupRepository: c.read<GroupRepository>(),
+                userStore: c.read<UserStore>(),
                 groupId: groupId,
-                userId: userId,
               ),
             ),
           ];

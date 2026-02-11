@@ -1,7 +1,6 @@
 import 'package:provider/provider.dart';
 import '../../../core/core.dart';
-import '../../../global_modules/auth/stores/auth_store.dart';
-import '../home/repositories/repositories.dart';
+import '../../../global_modules/global_modules.dart';
 import 'controllers/controllers.dart';
 import 'create_group_page.dart';
 import 'repositories/repositories.dart';
@@ -20,10 +19,9 @@ class CreateGroupModule extends ProviderModule {
             ),
           ),
           Provider<CreateGroupController>(
-            create: (context) => CreateGroupController(
-              groupRepository: context.read<GroupRepository>(),
-              createGroupRepository: context.read<CreateGroupRepository>(),
-              authStore: context.read<AuthStore>(),
+            create: (ctx) => CreateGroupController(
+              createGroupRepository: ctx.read<CreateGroupRepository>(),
+              userStore: ctx.read<UserStore>(),
             ),
           ),
         ],

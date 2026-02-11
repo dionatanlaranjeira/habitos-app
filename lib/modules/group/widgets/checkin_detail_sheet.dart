@@ -81,6 +81,8 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
         );
       }
 
+      final names = widget.controller.memberNamesAS.watch(context).value ?? {};
+      final memberName = names[checkIn.userId] ?? widget.memberName;
       final timeStr = DateFormat('HH:mm').format(checkIn.completedAt);
 
       return Container(
@@ -119,9 +121,7 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
                       alpha: 0.1,
                     ),
                     child: Text(
-                      widget.memberName.isNotEmpty
-                          ? widget.memberName[0].toUpperCase()
-                          : '?',
+                      memberName.isNotEmpty ? memberName[0].toUpperCase() : '?',
                       style: TextStyle(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -134,7 +134,7 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.memberName,
+                          memberName,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -256,7 +256,7 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
                                   'Usuário',
                               isOwner:
                                   comment.userId ==
-                                  widget.controller.authStore.user?.uid,
+                                  widget.controller.userStore.uid,
                               onDelete: () => widget.controller.deleteComment(
                                 checkIn.id,
                                 comment.id,

@@ -73,15 +73,6 @@ class HomeDrawer extends StatelessWidget {
 
             const Divider(),
 
-            // Opções
-            ListTile(
-              leading: const Icon(Icons.add_rounded),
-              title: const Text('Criar grupo'),
-              onTap: () {
-                Navigator.of(context).pop();
-                showCreateGroupSheet(context, controller);
-              },
-            ),
             ListTile(
               leading: const Icon(Icons.login_rounded),
               title: const Text('Entrar com código'),

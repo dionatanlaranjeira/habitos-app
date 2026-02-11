@@ -1,29 +1,29 @@
+import '../../../global_modules/user/stores/user_store.dart';
 import '../../../core/core.dart';
 import '../mixins/habit_selection_variables.dart';
 import '../models/category_model.dart';
 import '../models/habit_model.dart';
 import '../repositories/category_repository.dart';
 import '../repositories/habit_repository.dart';
-import '../../home/repositories/repositories.dart';
 
 class HabitSelectionController with HabitSelectionVariables {
   final HabitRepository _habitRepository;
   final CategoryRepository _categoryRepository;
-  final GroupRepository _groupRepository;
+  final UserStore _userStore;
   final String groupId;
-  final String userId;
 
   HabitSelectionController({
     required HabitRepository habitRepository,
     required CategoryRepository categoryRepository,
-    required GroupRepository groupRepository,
+    required UserStore userStore,
     required this.groupId,
-    required this.userId,
   }) : _habitRepository = habitRepository,
        _categoryRepository = categoryRepository,
-       _groupRepository = groupRepository {
+       _userStore = userStore {
     loadData();
   }
+
+  String? get userId => _userStore.uid;
 
   Future<void> loadData() async {
     await Future.wait([
@@ -57,11 +57,13 @@ class HabitSelectionController with HabitSelectionVariables {
     if (!canConfirm) return false;
 
     try {
+      if (userId == null) return false;
+
       await FutureHandler<void>(
         asyncState: saveStatusAS,
-        futureFunction: _groupRepository.saveMemberHabits(
+        futureFunction: _habitRepository.saveMemberHabits(
           groupId: groupId,
-          userId: userId,
+          userId: userId!,
           habitIds: selectedHabitIds.value,
         ),
       )();

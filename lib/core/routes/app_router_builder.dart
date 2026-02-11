@@ -4,12 +4,12 @@ import '../../global_modules/global_modules.dart';
 import 'app_router.dart';
 import '../../modules/modules.dart';
 
-GoRouter createAppRouter(AuthStore authStore) {
+GoRouter createAppRouter(UserStore userStore) {
   final router = GoRouter(
     initialLocation: SplashModule.path,
-    refreshListenable: authStore.currentUser,
+    refreshListenable: userStore.currentUser,
     redirect: (context, state) {
-      final isAuth = authStore.isAuthenticated;
+      final isAuth = userStore.isAuthenticated;
       final location = state.matchedLocation;
       final isAuthRoute =
           location == LoginModule.path || location == RegisterModule.path;

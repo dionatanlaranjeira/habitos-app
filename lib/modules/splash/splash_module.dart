@@ -8,15 +8,13 @@ class SplashModule extends ProviderModule {
   static const String path = '/splash';
 
   SplashModule()
-      : super(
-          path: path,
-          page: const SplashPage(),
-          bindings: (context) => [
-            Provider(
-              create: (ctx) => SplashController(
-                authStore: ctx.read<AuthStore>(),
-              ),
-            ),
-          ],
-        );
+    : super(
+        path: path,
+        page: const SplashPage(),
+        bindings: (context) => [
+          Provider(
+            create: (ctx) => SplashController(userStore: ctx.read<UserStore>()),
+          ),
+        ],
+      );
 }

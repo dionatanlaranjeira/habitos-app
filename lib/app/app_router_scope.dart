@@ -35,7 +35,7 @@ class _AppRouterScopeState extends State<AppRouterScope> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _router ??= createAppRouter(context.read<AuthStore>());
+    _router ??= createAppRouter(context.read<UserStore>());
   }
 
   @override

@@ -6,3 +6,4 @@ export 'checkin_feed_card.dart';
 export 'group_skeleton.dart';
 export 'reaction_bar.dart';
 export 'checkin_detail_sheet.dart';
+export 'group_info_sheet.dart';
