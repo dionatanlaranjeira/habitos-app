@@ -6,6 +6,7 @@ import '../../../shared/shared.dart';
 import '../../../global_modules/global_modules.dart';
 import '../../habit_selection/habit_selection.dart';
 import '../../group/group_module.dart';
+import '../../group/models/check_in_model.dart';
 import '../home.dart';
 
 class HomeController with HomeVariables {
@@ -32,8 +33,16 @@ class HomeController with HomeVariables {
 
       if (uid != _currentUserId) {
         _currentUserId = uid;
+        _activityCache.clear(); // Clear cache for new user
         _setupStream(uid);
+        _loadMonthActivity();
       }
+    });
+
+    // Efeito para recarregar ao mudar o mês
+    effect(() {
+      currentDateS.value;
+      _loadMonthActivity();
     });
   }
 
@@ -58,6 +67,56 @@ class HomeController with HomeVariables {
             groupsAS.value = AsyncError(e, s);
           },
         );
+  }
+
+  final Map<String, List<CheckInModel>> _activityCache = {};
+
+  Future<void> _loadMonthActivity() async {
+    final uid = _userId;
+    if (uid == null) {
+      monthActivityAS.value = AsyncData([]);
+      return;
+    }
+
+    final date = currentDateS.value;
+    final cacheKey = "${date.year}-${date.month}";
+
+    if (_activityCache.containsKey(cacheKey)) {
+      monthActivityAS.value = AsyncData(_activityCache[cacheKey]!);
+      isFirstLoadS.value = false;
+      return;
+    }
+
+    final start = DateTime(date.year, date.month, 1);
+    final end = DateTime(date.year, date.month + 1, 0);
+
+    await FutureHandler(
+      asyncState: monthActivityAS,
+      futureFunction: _homeRepository.getUserCheckIns(
+        userId: uid,
+        start: start,
+        end: end,
+      ),
+      onValue: (data) {
+        _activityCache[cacheKey] = data;
+        isFirstLoadS.value = false;
+      },
+    ).call(showLoading: false);
+  }
+
+  void nextMonth() {
+    final next = DateTime(
+      currentDateS.value.year,
+      currentDateS.value.month + 1,
+    );
+    final now = DateTime.now();
+    if (next.isAfter(DateTime(now.year, now.month))) return;
+    currentDateS.value = next;
+  }
+
+  void previousMonth() {
+    final date = currentDateS.value;
+    currentDateS.value = DateTime(date.year, date.month - 1);
   }
 
   /// Método para compatibilidade (refresh manual), mas o stream já é live.

@@ -1,3 +1,4 @@
+import '../../group/models/check_in_model.dart';
 import '../models/group_model.dart';
 
 abstract class HomeRepository {
@@ -13,5 +14,11 @@ abstract class HomeRepository {
   Future<List<String>> getMemberHabits({
     required String groupId,
     required String userId,
+  });
+
+  Future<List<CheckInModel>> getUserCheckIns({
+    required String userId,
+    required DateTime start,
+    required DateTime end,
   });
 }

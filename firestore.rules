@@ -97,6 +97,11 @@ service cloud.firestore {
       }
     }
 
+    // Regra para Collection Group: permite buscar check-ins do próprio usuário em todos os grupos
+    match /{path=**}/checkins/{checkinId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
     // Biblioteca de hábitos: leitura para todos autenticados
     match /habits/{habitId} {
       allow read: if request.auth != null;

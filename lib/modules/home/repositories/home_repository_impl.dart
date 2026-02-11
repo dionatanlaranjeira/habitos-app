@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../group/models/check_in_model.dart';
 import '../../../core/core.dart';
 import '../models/group_model.dart';
 import 'home_repository.dart';
@@ -85,5 +86,26 @@ class HomeRepositoryImpl implements HomeRepository {
       return habits.map((e) => e.toString()).toList();
     }
     return [];
+  }
+
+  @override
+  Future<List<CheckInModel>> getUserCheckIns({
+    required String userId,
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    final startStr = start.toIso8601String().split('T').first;
+    final endStr = end.toIso8601String().split('T').first;
+
+    final snapshot = await _firestore
+        .collectionGroup('checkins')
+        .where('userId', isEqualTo: userId)
+        .where('date', isGreaterThanOrEqualTo: startStr)
+        .where('date', isLessThanOrEqualTo: endStr)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => CheckInModel.fromFirestore(doc.id, doc.data()))
+        .toList();
   }
 }

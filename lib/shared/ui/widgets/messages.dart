@@ -62,9 +62,13 @@ class Messages {
 
   static void error(String? message) {
     if (message == null) return;
+    final context =
+        AppRouter.router.routerDelegate.navigatorKey.currentState?.overlay;
+    if (context == null) return;
+
     showTopSnackBar(
       displayDuration: Duration(seconds: 3),
-      AppRouter.router.routerDelegate.navigatorKey.currentState!.overlay!,
+      context,
       _snackBar(
         "Ops!",
         message,

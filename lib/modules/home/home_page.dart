@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:signals/signals_flutter.dart';
 
-import '../../global_modules/global_modules.dart'; // For UserStore
+import '../../global_modules/global_modules.dart';
+import '../../shared/shared.dart';
 import 'home.dart';
 
 class HomePage extends StatelessWidget {
@@ -22,53 +23,97 @@ class HomePage extends StatelessWidget {
         if (!hasGroups) return const SizedBox.shrink();
         return HomeFab(controller: controller);
       }),
-      body: SafeArea(
-        child: Watch((_) {
-          final user = userStore.user.value;
+      body: Watch((_) {
+        final user = userStore.user.value;
 
-          if (user == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        if (user == null) {
+          return const HomeSkeleton();
+        }
 
-          return Column(
-            children: [
-              HomeHeader(user: user),
-              Expanded(
-                child: Watch((_) {
-                  final state = controller.groupsAS.value;
-
-                  if (state.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (state.hasError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('Erro ao carregar grupos'),
-                          const SizedBox(height: 8),
-                          FilledButton(
-                            onPressed: controller.fetchGroups,
-                            child: const Text('Tentar novamente'),
-                          ),
-                        ],
+        return CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              pinned: false,
+              snap: true,
+              leading: Builder(
+                builder: (context) => IconButton(
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                  icon: const Icon(Icons.menu_rounded),
+                ),
+              ),
+              title: const Text(
+                'Meus Hábitos',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              centerTitle: true,
+            ),
+            HomeDashboard(controller: controller),
+            Watch((context) {
+              return SignalFutureBuilder<List<GroupModel>>(
+                asyncState: controller.groupsAS.watch(context),
+                loadingWidget: SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => const Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: GroupSkeleton(),
                       ),
+                      childCount: 3,
+                    ),
+                  ),
+                ),
+                errorWidget: SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Erro ao carregar grupos'),
+                        const SizedBox(height: 8),
+                        FilledButton(
+                          onPressed: controller.fetchGroups,
+                          child: const Text('Tentar novamente'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                builder: (groups) {
+                  if (groups.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: HomeEmptyState(controller: controller),
                     );
                   }
 
-                  final groups = state.value ?? [];
-                  if (groups.isEmpty) {
-                    return HomeEmptyState(controller: controller);
-                  }
-
-                  return GroupList(groups: groups);
-                }),
-              ),
-            ],
-          );
-        }),
-      ),
+                  return SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        if (index == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Text(
+                              'Seus grupos',
+                              style: context.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          );
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: GroupCard(group: groups[index - 1]),
+                        );
+                      }, childCount: groups.length + 1),
+                    ),
+                  );
+                },
+              );
+            }),
+          ],
+        );
+      }),
     );
   }
 }
