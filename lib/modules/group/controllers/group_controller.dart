@@ -21,6 +21,7 @@ class GroupController with GroupVariables {
     required HabitRepository habitRepository,
     required InteractionRepository
     interactionRepository, // Added to constructor
+    required WeeklyRankingRepository weeklyRankingRepository,
     required UserStore userStore,
   }) : _groupId = groupId,
        _groupRepository = groupRepository,
@@ -28,6 +29,7 @@ class GroupController with GroupVariables {
        _habitRepository = habitRepository,
        _interactionRepository =
            interactionRepository, // Added to initializer list
+       _weeklyRankingRepository = weeklyRankingRepository,
        _userStore = userStore {
     // Sincroniza o nome do próprio usuário reativamente
     effect(() {
@@ -49,6 +51,7 @@ class GroupController with GroupVariables {
   final CheckInRepository _checkInRepository;
   final HabitRepository _habitRepository;
   final InteractionRepository _interactionRepository;
+  final WeeklyRankingRepository _weeklyRankingRepository;
   final UserStore _userStore;
 
   UserStore get userStore => _userStore;
@@ -68,6 +71,7 @@ class GroupController with GroupVariables {
     _loadMembers();
     _loadMyHabits();
     _loadCheckIns();
+    _loadWeeklyRanking();
   }
 
   Future<void> _loadHabitLibrary() async {
@@ -193,6 +197,15 @@ class GroupController with GroupVariables {
     }
   }
 
+  Future<void> _loadWeeklyRanking({bool silent = false}) async {
+    await FutureHandler<WeeklyRankingModel>(
+      asyncState: weeklyRankingAS,
+      futureFunction: _weeklyRankingRepository.getWeeklyRanking(
+        groupId: _groupId,
+      ),
+    ).call(showLoading: !silent);
+  }
+
   bool isHabitCheckedIn(String habitId) {
     final checkIns = myCheckInsAS.value.value ?? [];
     return checkIns.any((c) => c.habitId == habitId);
@@ -276,6 +289,7 @@ class GroupController with GroupVariables {
 
         // Recarregar check-ins
         _loadCheckIns();
+        _loadWeeklyRanking(silent: true);
       },
       catchError: (e, s) {
         Log.error('Erro ao registrar check-in', error: e, stackTrace: s);
@@ -314,6 +328,10 @@ class GroupController with GroupVariables {
 
   Future<void> refresh() async {
     _init();
+  }
+
+  Future<void> refreshWeeklyRanking() async {
+    _loadWeeklyRanking();
   }
 
   // --- INTERAÇÕES ---

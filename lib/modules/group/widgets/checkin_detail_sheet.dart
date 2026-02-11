@@ -213,6 +213,7 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
 
                     SignalFutureBuilder<List<CommentModel>>(
                       asyncState: widget.controller.checkinCommentsAS.value,
+                      emptyWidget: SizedBox.shrink(),
                       errorWidget: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 20),
                         child: Center(

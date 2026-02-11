@@ -38,6 +38,11 @@ class GroupModule extends ProviderModule {
                 firestore: context.read<FirestoreAdapter>().instance,
               ),
             ),
+            Provider<WeeklyRankingRepository>(
+              create: (context) => WeeklyRankingRepositoryImpl(
+                functionsAdapter: context.read<FunctionsAdapter>(),
+              ),
+            ),
             Provider<GroupController>(
               create: (context) => GroupController(
                 groupId: groupId,
@@ -45,6 +50,8 @@ class GroupModule extends ProviderModule {
                 checkInRepository: context.read<CheckInRepository>(),
                 habitRepository: context.read<HabitRepository>(),
                 interactionRepository: context.read<InteractionRepository>(),
+                weeklyRankingRepository: context
+                    .read<WeeklyRankingRepository>(),
                 userStore: context.read<UserStore>(),
               ),
             ),

@@ -15,6 +15,7 @@ mixin GroupVariables {
   final membersAS = asyncSignal<List<GroupMemberModel>>(AsyncLoading());
   final memberNamesAS = asyncSignal<Map<String, String>>(AsyncData({}));
   final checkinCommentsAS = asyncSignal<List<CommentModel>>(AsyncLoading());
+  final weeklyRankingAS = asyncSignal<WeeklyRankingModel>(AsyncLoading());
   final submitCheckInAS = asyncSignal<void>(AsyncData(null));
 
   final selectedDate = signal<DateTime>(DateTime.now());

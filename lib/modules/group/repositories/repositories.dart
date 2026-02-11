@@ -6,3 +6,5 @@ export 'interaction_repository.dart';
 export 'interaction_repository_impl.dart';
 export 'group_detail_repository.dart';
 export 'group_detail_repository_impl.dart';
+export 'weekly_ranking_repository.dart';
+export 'weekly_ranking_repository_impl.dart';

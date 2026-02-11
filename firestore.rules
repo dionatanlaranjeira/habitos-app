@@ -69,6 +69,32 @@ service cloud.firestore {
             && request.auth.uid == resource.data.userId;
         }
       }
+
+      // Ranking semanal agregado por Cloud Functions
+      match /weekly_rankings/{weekId} {
+        allow read: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+        allow write: if false;
+
+        match /entries/{userId} {
+          allow read: if request.auth != null
+            && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+          allow write: if false;
+        }
+      }
+
+      // Estatísticas de temporada (tie-break) agregadas por Cloud Functions
+      match /season_stats/{userId} {
+        allow read: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+        allow write: if false;
+
+        match /active_days/{dateId} {
+          allow read: if request.auth != null
+            && request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+          allow write: if false;
+        }
+      }
     }
 
     // Biblioteca de hábitos: leitura para todos autenticados
