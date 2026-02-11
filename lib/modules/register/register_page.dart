@@ -53,7 +53,7 @@ class RegisterPage extends StatelessWidget {
                   // Form fields
                   DefaultInputField(
                     controller: controller.nameController,
-                    label: 'Nome (opcional)',
+                    label: 'Nome',
                     validatorHandler: validator,
                     validationField: 'name',
                   ),

@@ -17,8 +17,12 @@ class LoginPage extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final validator = FieldValidationHandler(
       fields: {
-        'email': z.string().email(),
-        'password': z.string().min(6),
+        'email': z
+            .string(message: "O email é obrigatório")
+            .email(message: "Email inválido"),
+        'password': z
+            .string(message: "A senha é obrigatória")
+            .min(6, message: "A senha deve ter pelo menos 6 caracteres"),
       },
     );
 

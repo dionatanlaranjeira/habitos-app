@@ -28,8 +28,7 @@ class StepIdentity extends StatelessWidget {
             TextFormField(
               controller: controller.groupNameController,
               decoration: const InputDecoration(
-                labelText: 'Nome do Grupo',
-                hintText: 'Ex: Os Imparáveis',
+                labelText: 'Nome do grupo',
                 border: OutlineInputBorder(),
               ),
               validator: (v) => controller.validator.validate('name', v),

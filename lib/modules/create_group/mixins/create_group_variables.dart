@@ -24,6 +24,11 @@ mixin CreateGroupVariables {
   final scheduledStartDateS = signal<DateTime?>(null);
 
   final validator = FieldValidationHandler(
-    fields: {'name': z.string().min(3).max(30)},
+    fields: {
+      'name': z
+          .string(message: "O nome do grupo é obrigatório")
+          .min(3, message: "O nome do grupo deve ter pelo menos 3 caracteres")
+          .max(30, message: "O nome do grupo deve ter no máximo 30 caracteres"),
+    },
   );
 }

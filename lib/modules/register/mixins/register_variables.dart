@@ -15,9 +15,16 @@ mixin RegisterVariables {
 
   final validator = FieldValidationHandler(
     fields: {
-      'name': z.string().optional(),
-      'email': z.string().email(),
-      'password': z.string().min(6),
+      'name': z
+          .string(message: "O nome é obrigatório")
+          .min(3, message: "O nome deve ter pelo menos 3 caracteres")
+          .max(30, message: "O nome deve ter no máximo 30 caracteres"),
+      'email': z
+          .string(message: "O email é obrigatório")
+          .email(message: "Email inválido"),
+      'password': z
+          .string(message: "A senha é obrigatória")
+          .min(6, message: "A senha deve ter pelo menos 6 caracteres"),
     },
   );
 }
