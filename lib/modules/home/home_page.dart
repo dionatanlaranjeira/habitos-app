@@ -79,13 +79,10 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ),
+                emptyWidget: SliverToBoxAdapter(
+                  child: HomeEmptyState(controller: controller),
+                ),
                 builder: (groups) {
-                  if (groups.isEmpty) {
-                    return SliverToBoxAdapter(
-                      child: HomeEmptyState(controller: controller),
-                    );
-                  }
-
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
                     sliver: SliverList(

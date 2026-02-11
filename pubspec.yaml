@@ -58,6 +58,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_native_splash: ^2.4.4
   flutter_launcher_icons: ^0.14.4
   json_serializable: ^6.11.1
   freezed: ^3.2.3
@@ -71,6 +72,7 @@ flutter:
   assets:
     - assets/fonts/
     - assets/images/
+    - assets/icon/
 
   fonts:
     - family: Poppins

@@ -66,42 +66,56 @@ class Messages {
         AppRouter.router.routerDelegate.navigatorKey.currentState?.overlay;
     if (context == null) return;
 
-    showTopSnackBar(
-      displayDuration: Duration(seconds: 3),
-      context,
-      _snackBar(
-        "Ops!",
-        message,
-        "assets/images/error.png",
-        AppColors.i.errorColor,
-      ),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showTopSnackBar(
+        displayDuration: const Duration(seconds: 3),
+        context,
+        _snackBar(
+          "Ops!",
+          message,
+          "assets/images/error.png",
+          AppColors.i.errorColor,
+        ),
+      );
+    });
   }
 
   static void info(String? message) {
     if (message == null) return;
-    showTopSnackBar(
-      AppRouter.router.routerDelegate.navigatorKey.currentState!.overlay!,
-      _snackBar(
-        "Informativo",
-        message,
-        "assets/images/info.png",
-        AppColors.i.infoColor,
-      ),
-    );
+    final context =
+        AppRouter.router.routerDelegate.navigatorKey.currentState?.overlay;
+    if (context == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showTopSnackBar(
+        context,
+        _snackBar(
+          "Informativo",
+          message,
+          "assets/images/info.png",
+          AppColors.i.infoColor,
+        ),
+      );
+    });
   }
 
   static void success(String? message) {
     if (message == null) return;
-    showTopSnackBar(
-      AppRouter.router.routerDelegate.navigatorKey.currentState!.overlay!,
-      _snackBar(
-        "Sucesso!",
-        message,
-        "assets/images/success.png",
-        AppColors.i.successColor,
-      ),
-    );
+    final context =
+        AppRouter.router.routerDelegate.navigatorKey.currentState?.overlay;
+    if (context == null) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showTopSnackBar(
+        context,
+        _snackBar(
+          "Sucesso!",
+          message,
+          "assets/images/success.png",
+          AppColors.i.successColor,
+        ),
+      );
+    });
   }
 
   static Color _getSafeBackgroundColor() {
