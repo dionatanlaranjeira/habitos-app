@@ -30,9 +30,25 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            val keystoreFile = project.rootProject.file("key.properties")
+            val props = java.util.Properties()
+            if (keystoreFile.exists()) {
+                props.load(java.io.FileInputStream(keystoreFile))
+                keyAlias = props["keyAlias"] as String
+                keyPassword = props["keyPassword"] as String
+                storeFile = file(props["storeFile"] as String)
+                storePassword = props["storePassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
 }

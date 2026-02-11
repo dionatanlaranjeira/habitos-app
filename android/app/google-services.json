@@ -7,48 +7,28 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1008207391772:android:0c7e0b51cbc342aeff83d9",
-        "android_client_info": {
-          "package_name": "com.habitos"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "1008207391772-6oog45e5ds37994l3rj3ijkjivm6fppj.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDEbBDC0jY6xp1xSMxz-FYq8jvsIb6J14k"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1008207391772-6oog45e5ds37994l3rj3ijkjivm6fppj.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "1008207391772-5cauo1nddukgm20ng873fv51u77imfmj.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.habitos"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:1008207391772:android:acd0503715dd4ba4ff83d9",
         "android_client_info": {
           "package_name": "com.habitus"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1008207391772-9u40sam0c3sdtsihvg8qf9e13a3rrvfn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.habitus",
+            "certificate_hash": "0d521889aba2ea3f8a860e4ce7a82149da6011d5"
+          }
+        },
+        {
+          "client_id": "1008207391772-t3ofrr7l9meq9043315guh6bsic66kc6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.habitus",
+            "certificate_hash": "43c132fe1f1c99410befc36621b6ec82421c325f"
+          }
+        },
         {
           "client_id": "1008207391772-6oog45e5ds37994l3rj3ijkjivm6fppj.apps.googleusercontent.com",
           "client_type": 3
