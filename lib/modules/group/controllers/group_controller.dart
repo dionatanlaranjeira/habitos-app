@@ -301,10 +301,6 @@ class GroupController with GroupVariables {
         _loadCheckIns();
         _loadWeeklyRanking(silent: true);
       },
-      catchError: (e, s) {
-        Log.error('Erro ao registrar check-in', error: e, stackTrace: s);
-        Messages.error('Erro ao registrar check-in.');
-      },
     ).call();
   }
 
@@ -360,10 +356,6 @@ class GroupController with GroupVariables {
         _loadCheckIns(silent: true);
         _loadWeeklyRanking(silent: true);
       },
-      catchError: (e, s) {
-        Log.error('Erro ao remover check-in', error: e, stackTrace: s);
-        Messages.error('Não foi possível remover o check-in.');
-      },
     ).call(showLoading: false);
   }
 
@@ -374,10 +366,6 @@ class GroupController with GroupVariables {
       onValue: (_) {
         Messages.success('Você saiu do grupo.');
         AppRouter.router.go('/home');
-      },
-      catchError: (e, s) {
-        Log.error('Erro ao sair do grupo', error: e, stackTrace: s);
-        Messages.error('Não foi possível sair do grupo.');
       },
     ).call();
   }
@@ -429,8 +417,7 @@ class GroupController with GroupVariables {
         userId: _userId!,
         emoji: emoji,
       ),
-      catchError: (e, s) =>
-          Log.error('Erro ao alternar reação', error: e, stackTrace: s),
+      catchError: (e, s) => null, // ExceptionHandler já trata
     ).call(showLoading: false);
   }
 
@@ -467,8 +454,7 @@ class GroupController with GroupVariables {
         userId: _userId!,
         text: text.trim(),
       ),
-      catchError: (e, s) =>
-          Log.error('Erro ao adicionar comentário', error: e, stackTrace: s),
+      catchError: (e, s) => null,
     ).call(showLoading: false);
   }
 
@@ -499,8 +485,7 @@ class GroupController with GroupVariables {
         checkinId: checkinId,
         commentId: commentId,
       ),
-      catchError: (e, s) =>
-          Log.error('Erro ao deletar comentário', error: e, stackTrace: s),
+      catchError: (e, s) => null,
     ).call(showLoading: false);
   }
 

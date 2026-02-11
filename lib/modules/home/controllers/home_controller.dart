@@ -89,35 +89,26 @@ class HomeController with HomeVariables {
           extra: {'groupId': group.id},
         );
       },
-      catchError: (e, s) {
-        Log.error('Falha ao entrar no grupo', error: e, stackTrace: s);
-        Messages.error('Não foi possível entrar no grupo.');
-      },
     ).call();
   }
 
   Future<void> selectGroup(GroupModel group) async {
     if (_userId == null) return;
 
-    try {
-      final habits = await _homeRepository.getMemberHabits(
-        groupId: group.id,
-        userId: _userId!,
-      );
+    final habits = await _homeRepository.getMemberHabits(
+      groupId: group.id,
+      userId: _userId!,
+    );
 
-      if (habits.isEmpty) {
-        AppRouter.router.push(
-          HabitSelectionModule.path,
-          extra: {'groupId': group.id},
-        );
-      } else {
-        AppRouter.router.push(
-          GroupModule.path.replaceFirst(':groupId', group.id),
-        );
-      }
-    } catch (e, s) {
-      Log.error('Erro ao selecionar grupo', error: e, stackTrace: s);
-      Messages.error('Erro ao acessar o grupo. Tente novamente.');
+    if (habits.isEmpty) {
+      AppRouter.router.push(
+        HabitSelectionModule.path,
+        extra: {'groupId': group.id},
+      );
+    } else {
+      AppRouter.router.push(
+        GroupModule.path.replaceFirst(':groupId', group.id),
+      );
     }
   }
 

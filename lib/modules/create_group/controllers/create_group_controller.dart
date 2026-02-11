@@ -96,10 +96,6 @@ class CreateGroupController with CreateGroupVariables {
           extra: {'groupId': group.id},
         );
       },
-      catchError: (e, s) {
-        Log.error('Erro ao criar grupo', error: e, stackTrace: s);
-        Messages.error('Não foi possível criar o grupo.');
-      },
     ).call();
   }
 }

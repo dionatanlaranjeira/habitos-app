@@ -10,7 +10,7 @@ class Messages {
       child: CustomSnackBar.snackBar(
         borderRadius: BorderRadius.circular(4),
         child: Material(
-          color: currentContext.backgroundColor,
+          color: _getSafeBackgroundColor(),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -98,5 +98,14 @@ class Messages {
         AppColors.i.successColor,
       ),
     );
+  }
+
+  static Color _getSafeBackgroundColor() {
+    try {
+      return currentContext.backgroundColor;
+    } catch (_) {
+      // Fallback para uma cor segura se o contexto estiver instável
+      return AppColors.i.containerColor;
+    }
   }
 }

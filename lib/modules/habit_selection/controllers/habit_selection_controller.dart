@@ -55,21 +55,17 @@ class HabitSelectionController with HabitSelectionVariables {
 
   Future<bool> confirmSelection() async {
     if (!canConfirm) return false;
+    if (userId == null) return false;
 
-    try {
-      if (userId == null) return false;
+    await FutureHandler<void>(
+      asyncState: saveStatusAS,
+      futureFunction: _habitRepository.saveMemberHabits(
+        groupId: groupId,
+        userId: userId!,
+        habitIds: selectedHabitIds.value,
+      ),
+    )();
 
-      await FutureHandler<void>(
-        asyncState: saveStatusAS,
-        futureFunction: _habitRepository.saveMemberHabits(
-          groupId: groupId,
-          userId: userId!,
-          habitIds: selectedHabitIds.value,
-        ),
-      )();
-      return true;
-    } catch (_) {
-      return false;
-    }
+    return true;
   }
 }

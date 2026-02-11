@@ -32,7 +32,7 @@ class GroupPage extends StatelessWidget {
           actions: [
             IconButton(
               onPressed: () => GroupInfoSheet.show(context, controller),
-              icon: const Icon(LucideIcons.info),
+              icon: const Icon(Icons.menu),
               tooltip: 'Informações do Grupo',
             ),
           ],

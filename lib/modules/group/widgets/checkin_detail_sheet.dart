@@ -84,11 +84,12 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
       final names = widget.controller.memberNamesAS.watch(context).value ?? {};
       final memberName = names[checkIn.userId] ?? widget.memberName;
       final timeStr = DateFormat('HH:mm').format(checkIn.completedAt);
-      final isMyCheckin = checkIn.userId == widget.controller.userStore.uid;
 
       return Container(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom:
+              MediaQuery.of(context).viewInsets.bottom +
+              MediaQuery.of(context).padding.bottom,
         ),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -151,48 +152,9 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
                       ],
                     ),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isMyCheckin)
-                        IconButton(
-                          tooltip: 'Excluir check-in',
-                          onPressed: () async {
-                            final shouldDelete = await showDialog<bool>(
-                              context: context,
-                              builder: (dialogContext) => AlertDialog(
-                                title: const Text('Excluir check-in'),
-                                content: const Text(
-                                  'Essa ação remove o check-in, comentários, reações e a mídia. Deseja continuar?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(dialogContext, false),
-                                    child: const Text('Cancelar'),
-                                  ),
-                                  FilledButton(
-                                    onPressed: () =>
-                                        Navigator.pop(dialogContext, true),
-                                    child: const Text('Excluir'),
-                                  ),
-                                ],
-                              ),
-                            );
-
-                            if (shouldDelete != true) return;
-                            await widget.controller.deleteCheckIn(checkIn.id);
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                            }
-                          },
-                          icon: const Icon(LucideIcons.trash2),
-                        ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(LucideIcons.x),
-                      ),
-                    ],
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(LucideIcons.x),
                   ),
                 ],
               ),
