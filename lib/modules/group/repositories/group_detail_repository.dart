@@ -9,4 +9,5 @@ abstract class GroupDetailRepository {
     required String userId,
   });
   Future<String?> getUserName(String userId);
+  Future<void> leaveGroup({required String groupId});
 }

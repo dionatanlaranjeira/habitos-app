@@ -25,11 +25,13 @@ class GroupModule extends ProviderModule {
             Provider<GroupDetailRepository>(
               create: (context) => GroupDetailRepositoryImpl(
                 firestore: context.read<FirestoreAdapter>(),
+                functionsAdapter: context.read<FunctionsAdapter>(),
               ),
             ),
             Provider<CheckInRepository>(
               create: (context) => CheckInRepositoryImpl(
                 firestore: context.read<FirestoreAdapter>(),
+                functionsAdapter: context.read<FunctionsAdapter>(),
                 storageRepository: context.read<StorageRepository>(),
               ),
             ),

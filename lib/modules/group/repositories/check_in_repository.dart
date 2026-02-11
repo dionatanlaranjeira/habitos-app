@@ -22,4 +22,9 @@ abstract class CheckInRepository {
     required String userId,
     required String date,
   });
+
+  Future<void> deleteCheckIn({
+    required String groupId,
+    required String checkinId,
+  });
 }

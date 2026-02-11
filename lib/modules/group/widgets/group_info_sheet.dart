@@ -178,6 +178,9 @@ class GroupInfoSheet extends StatelessWidget {
                         controller.membersAS.watch(context).value ?? [];
                     final names =
                         controller.memberNamesAS.watch(context).value ?? {};
+                    controller.ensureMemberNamesLoaded(
+                      members.map((m) => m.userId).toList(),
+                    );
 
                     return ListView.builder(
                       shrinkWrap: true,
@@ -185,7 +188,9 @@ class GroupInfoSheet extends StatelessWidget {
                       itemCount: members.length,
                       itemBuilder: (context, index) {
                         final member = members[index];
-                        final name = names[member.userId] ?? 'Carregando...';
+                        final name =
+                            names[member.userId] ??
+                            _fallbackMemberName(member.userId);
                         final isOwner = member.userId == group.ownerId;
 
                         return ListTile(
@@ -242,25 +247,35 @@ class GroupInfoSheet extends StatelessWidget {
           // Footer / Sair do Grupo
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  // TODO: Implementar sair do grupo
-                  Navigator.pop(context);
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
-                  side: BorderSide(color: theme.colorScheme.error),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            child: Watch((_) {
+              final isLeaving = controller.groupActionAS.value.isLoading;
+              return SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: isLeaving
+                      ? null
+                      : () async {
+                          await _showLeaveGroupDialog(context, controller);
+                        },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: theme.colorScheme.error,
+                    side: BorderSide(color: theme.colorScheme.error),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
+                  icon: isLeaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(LucideIcons.logOut, size: 18),
+                  label: Text(isLeaving ? 'Saindo...' : 'Sair do Grupo'),
                 ),
-                icon: const Icon(LucideIcons.logOut, size: 18),
-                label: const Text('Sair do Grupo'),
-              ),
-            ),
+              );
+            }),
           ),
         ],
       ),
@@ -273,6 +288,63 @@ class GroupInfoSheet extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => GroupInfoSheet(controller: controller),
+    );
+  }
+
+  String _fallbackMemberName(String userId) {
+    final suffix = userId.length >= 6 ? userId.substring(0, 6) : userId;
+    return 'Membro $suffix';
+  }
+
+  Future<void> _showLeaveGroupDialog(
+    BuildContext context,
+    GroupController controller,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return Watch((_) {
+          final isLeaving = controller.groupActionAS.value.isLoading;
+          return AlertDialog(
+            title: const Text('Sair do grupo'),
+            content: const Text(
+              'Você vai sair do grupo e seus check-ins serão removidos. Deseja continuar?',
+            ),
+            actions: [
+              SizedBox(
+                width: 110,
+                child: TextButton(
+                  onPressed: isLeaving
+                      ? null
+                      : () => Navigator.pop(dialogContext),
+                  child: const Text('Cancelar'),
+                ),
+              ),
+              SizedBox(
+                width: 110,
+                child: FilledButton(
+                  onPressed: isLeaving
+                      ? null
+                      : () async {
+                          await controller.leaveGroup();
+                          if (dialogContext.mounted) {
+                            Navigator.pop(dialogContext);
+                          }
+                        },
+                  child: isLeaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Sair'),
+                ),
+              ),
+            ],
+          );
+        });
+      },
     );
   }
 }

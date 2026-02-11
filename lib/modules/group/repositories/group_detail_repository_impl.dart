@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../../../core/core.dart';
 import '../../home/models/group_member_model.dart';
 import '../../home/models/group_model.dart';
@@ -6,9 +7,13 @@ import 'group_detail_repository.dart';
 
 class GroupDetailRepositoryImpl implements GroupDetailRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseFunctions _functions;
 
-  GroupDetailRepositoryImpl({required FirestoreAdapter firestore})
-    : _firestore = firestore.instance;
+  GroupDetailRepositoryImpl({
+    required FirestoreAdapter firestore,
+    required FunctionsAdapter functionsAdapter,
+  }) : _firestore = firestore.instance,
+       _functions = functionsAdapter.instance;
 
   @override
   Future<GroupModel?> getGroupById(String groupId) async {
@@ -44,7 +49,7 @@ class GroupDetailRepositoryImpl implements GroupDetailRepository {
     if (!doc.exists || doc.data() == null) return [];
 
     final data = doc.data()!;
-    final habitIds = data['habitIds'] as List<dynamic>?;
+    final habitIds = data['selectedHabitIds'] as List<dynamic>?;
     return habitIds?.map((e) => e.toString()).toList() ?? [];
   }
 
@@ -52,5 +57,11 @@ class GroupDetailRepositoryImpl implements GroupDetailRepository {
   Future<String?> getUserName(String userId) async {
     final doc = await _firestore.collection('users').doc(userId).get();
     return doc.data()?['name'] as String?;
+  }
+
+  @override
+  Future<void> leaveGroup({required String groupId}) async {
+    final callable = _functions.httpsCallable('leaveGroup');
+    await callable.call(<String, dynamic>{'groupId': groupId});
   }
 }

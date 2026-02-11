@@ -22,9 +22,11 @@ interface WeeklyRankingEntry {
 }
 
 const db = admin.firestore();
+const storage = admin.storage();
 
 function parseDateKey(value: string): LocalDate | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+
   const [yearRaw, monthRaw, dayRaw] = value.split("-");
   const year = Number(yearRaw);
   const month = Number(monthRaw);
@@ -91,14 +93,13 @@ function addDays(date: LocalDate, days: number): LocalDate {
 
 function getElapsedSeasonDays(
   seasonStartDate: LocalDate | null,
-  checkinDate: LocalDate,
+  referenceDate: LocalDate,
   seasonDuration: number,
 ): number {
   if (!seasonStartDate) return 0;
 
   const start = toUtcDate(seasonStartDate).getTime();
-  const current = toUtcDate(checkinDate).getTime();
-
+  const current = toUtcDate(referenceDate).getTime();
   if (current < start) return 0;
 
   const diffDays = Math.floor((current - start) / (24 * 60 * 60 * 1000)) + 1;
@@ -118,6 +119,59 @@ function sortRanking(a: WeeklyRankingEntry, b: WeeklyRankingEntry): number {
     return a.seasonZeroDays - b.seasonZeroDays;
   }
   return a.displayName.localeCompare(b.displayName, "pt-BR");
+}
+
+function assignRankingPositions(ranking: WeeklyRankingEntry[]): void {
+  let previousKey = "";
+  let previousPosition = 0;
+
+  ranking.forEach((entry, index) => {
+    const key = buildSortKey(entry);
+
+    if (index === 0) {
+      entry.position = 1;
+      previousKey = key;
+      previousPosition = 1;
+      return;
+    }
+
+    if (key === previousKey) {
+      entry.position = previousPosition;
+      return;
+    }
+
+    entry.position = index + 1;
+    previousKey = key;
+    previousPosition = entry.position;
+  });
+}
+
+function getStoragePathFromPhotoUrl(photoUrl: string): string | null {
+  if (!photoUrl) return null;
+
+  if (photoUrl.startsWith("gs://")) {
+    const withoutProtocol = photoUrl.replace("gs://", "");
+    const firstSlash = withoutProtocol.indexOf("/");
+    if (firstSlash < 0) return null;
+    return withoutProtocol.substring(firstSlash + 1);
+  }
+
+  const marker = "/o/";
+  const markerIndex = photoUrl.indexOf(marker);
+  if (markerIndex < 0) return null;
+
+  const afterMarker = photoUrl.substring(markerIndex + marker.length);
+  const questionMarkIndex = afterMarker.indexOf("?");
+  const encodedPath =
+    questionMarkIndex >= 0
+      ? afterMarker.substring(0, questionMarkIndex)
+      : afterMarker;
+
+  try {
+    return decodeURIComponent(encodedPath);
+  } catch (_) {
+    return null;
+  }
 }
 
 export const onCheckinCreated = functions.firestore
@@ -207,6 +261,18 @@ export const onCheckinCreated = functions.firestore
         entrySnap.data()?.weeklyActiveDays ?? 0,
       );
 
+      const currentPoints = previousPoints + points;
+      const currentWeeklyActiveDays =
+        previousWeeklyActiveDays + (firstCheckinOfDay ? 1 : 0);
+
+      const snapshotMembersUpdate = {
+        userId,
+        displayName: "Usuário",
+        points: currentPoints,
+        weeklyActiveDays: currentWeeklyActiveDays,
+        seasonActiveDays,
+      };
+
       tx.set(
         weekRef,
         {
@@ -214,6 +280,7 @@ export const onCheckinCreated = functions.firestore
           timezone,
           weekStartDate: weekStartKey,
           weekEndDate: formatDateKey(addDays(weekStart, 6)),
+          [`snapshotMembers.${userId}`]: snapshotMembersUpdate,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         },
         {merge: true},
@@ -223,15 +290,159 @@ export const onCheckinCreated = functions.firestore
         weekEntryRef,
         {
           userId,
-          points: previousPoints + points,
-          weeklyActiveDays:
-            previousWeeklyActiveDays + (firstCheckinOfDay ? 1 : 0),
+          points: currentPoints,
+          weeklyActiveDays: currentWeeklyActiveDays,
           seasonActiveDays,
           seasonZeroDays,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         },
         {merge: true},
       );
+    });
+  });
+
+export const onCheckinDeleted = functions.firestore
+  .document("groups/{groupId}/checkins/{checkinId}")
+  .onDelete(async (snapshot, context) => {
+    const data = snapshot.data();
+    if (!data) return;
+
+    const {groupId} = context.params;
+    const userId = String(data.userId ?? "").trim();
+    const dateKey = String(data.date ?? "").trim();
+    const points = typeof data.points === "number" ? data.points : 1;
+
+    if (!userId || !dateKey) return;
+
+    const storagePath =
+      String(data.storagePath ?? "").trim() ||
+      getStoragePathFromPhotoUrl(String(data.photoUrl ?? ""));
+
+    if (storagePath) {
+      try {
+        await storage.bucket().file(storagePath).delete({ignoreNotFound: true});
+      } catch (error) {
+        functions.logger.warn("Falha ao remover mídia do check-in", {
+          groupId,
+          userId,
+          storagePath,
+          error,
+        });
+      }
+    }
+
+    const groupRef = db.collection("groups").doc(groupId);
+    const groupSnap = await groupRef.get();
+    if (!groupSnap.exists) return;
+
+    const groupData = groupSnap.data() ?? {};
+    const timezone = String(groupData.timezone ?? "UTC");
+    const parsedDate = parseDateKey(dateKey) ?? getDateInTimeZone(new Date(), timezone);
+    const weekStart = getWeekStartSunday(parsedDate);
+    const weekStartKey = formatDateKey(weekStart);
+
+    const seasonStartTimestamp = groupData.seasonStartDate as
+      | admin.firestore.Timestamp
+      | undefined;
+    const seasonStartDate = seasonStartTimestamp
+      ? getDateInTimeZone(seasonStartTimestamp.toDate(), timezone)
+      : null;
+    const seasonDuration = Number(groupData.seasonDuration ?? 30);
+    const elapsedSeasonDays = getElapsedSeasonDays(
+      seasonStartDate,
+      getDateInTimeZone(new Date(), timezone),
+      seasonDuration,
+    );
+
+    const remainingDaySnapshot = await groupRef
+      .collection("checkins")
+      .where("userId", "==", userId)
+      .where("date", "==", dateKey)
+      .limit(1)
+      .get();
+
+    const hasRemainingCheckinInDay = !remainingDaySnapshot.empty;
+
+    const statsRef = groupRef.collection("season_stats").doc(userId);
+    const markerRef = statsRef.collection("active_days").doc(dateKey);
+    const weekRef = groupRef.collection("weekly_rankings").doc(weekStartKey);
+    const weekEntryRef = weekRef.collection("entries").doc(userId);
+
+    await db.runTransaction(async (tx) => {
+      const [statsSnap, weekEntrySnap] = await Promise.all([
+        tx.get(statsRef),
+        tx.get(weekEntryRef),
+      ]);
+
+      const previousSeasonActiveDays = Number(
+        statsSnap.data()?.seasonActiveDays ?? 0,
+      );
+      const seasonActiveDays = Math.max(
+        0,
+        previousSeasonActiveDays - (hasRemainingCheckinInDay ? 0 : 1),
+      );
+      const seasonZeroDays = Math.max(0, elapsedSeasonDays - seasonActiveDays);
+
+      tx.set(
+        statsRef,
+        {
+          seasonActiveDays,
+          seasonZeroDays,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        {merge: true},
+      );
+
+      if (!hasRemainingCheckinInDay) {
+        tx.delete(markerRef);
+      }
+
+      const previousPoints = Number(weekEntrySnap.data()?.points ?? 0);
+      const previousWeeklyActiveDays = Number(
+        weekEntrySnap.data()?.weeklyActiveDays ?? 0,
+      );
+
+      const nextPoints = Math.max(0, previousPoints - points);
+      const nextWeeklyActiveDays = Math.max(
+        0,
+        previousWeeklyActiveDays - (hasRemainingCheckinInDay ? 0 : 1),
+      );
+
+      if (nextPoints == 0 && nextWeeklyActiveDays == 0) {
+        tx.delete(weekEntryRef);
+        tx.set(
+          weekRef,
+          {
+            [`snapshotMembers.${userId}`]: admin.firestore.FieldValue.delete(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          {merge: true},
+        );
+      } else {
+        tx.set(
+          weekEntryRef,
+          {
+            points: nextPoints,
+            weeklyActiveDays: nextWeeklyActiveDays,
+            seasonActiveDays,
+            seasonZeroDays,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          {merge: true},
+        );
+
+        tx.set(
+          weekRef,
+          {
+            [`snapshotMembers.${userId}.userId`]: userId,
+            [`snapshotMembers.${userId}.points`]: nextPoints,
+            [`snapshotMembers.${userId}.weeklyActiveDays`]: nextWeeklyActiveDays,
+            [`snapshotMembers.${userId}.seasonActiveDays`]: seasonActiveDays,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          {merge: true},
+        );
+      }
     });
   });
 
@@ -271,6 +482,7 @@ export const getWeeklyGroupRanking = functions.https.onCall(
 
     const timezone = String(groupData.timezone ?? "UTC");
     const currentDate = getDateInTimeZone(new Date(), timezone);
+
     const weekStartDate = getWeekStartSunday(currentDate);
     const weekStartKey = formatDateKey(weekStartDate);
     const weekEndKey = formatDateKey(addDays(weekStartDate, 6));
@@ -290,13 +502,14 @@ export const getWeeklyGroupRanking = functions.https.onCall(
       seasonDuration,
     );
 
-    const activeMembersSnap = await groupRef
-      .collection("members")
-      .where("status", "==", "active")
-      .get();
+    const weekRef = groupRef.collection("weekly_rankings").doc(weekStartKey);
+
+    const [weekSnap, activeMembersSnap] = await Promise.all([
+      weekRef.get(),
+      groupRef.collection("members").where("status", "==", "active").get(),
+    ]);
 
     const activeUserIds = activeMembersSnap.docs.map((doc) => doc.id);
-
     if (activeUserIds.length === 0) {
       return {
         weekStartDate: weekStartKey,
@@ -309,58 +522,23 @@ export const getWeeklyGroupRanking = functions.https.onCall(
       };
     }
 
-    const weekEntriesSnap = await groupRef
-      .collection("weekly_rankings")
-      .doc(weekStartKey)
-      .collection("entries")
-      .get();
-
-    const entriesByUserId = new Map<string, FirebaseFirestore.DocumentData>();
-    weekEntriesSnap.docs.forEach((doc) => {
-      entriesByUserId.set(doc.id, doc.data());
-    });
-
-    const statsSnaps = await Promise.all(
-      activeUserIds.map((uid) => groupRef.collection("season_stats").doc(uid).get()),
-    );
-
-    const statsByUserId = new Map<string, FirebaseFirestore.DocumentData>();
-    statsSnaps.forEach((doc) => {
-      if (doc.exists) {
-        statsByUserId.set(doc.id, doc.data() ?? {});
-      }
-    });
-
-    const userSnaps = await Promise.all(
-      activeUserIds.map((uid) => db.collection("users").doc(uid).get()),
-    );
-
-    const nameByUserId = new Map<string, string>();
-    userSnaps.forEach((doc) => {
-      const name = String((doc.data() ?? {}).name ?? "").trim();
-      nameByUserId.set(doc.id, name || "Usuário");
-    });
+    const weekData = weekSnap.data() ?? {};
+    const snapshotMembers =
+      (weekData.snapshotMembers as
+        | Record<string, Record<string, unknown>>
+        | undefined) ?? {};
 
     const ranking: WeeklyRankingEntry[] = activeUserIds.map((uid) => {
-      const entry = entriesByUserId.get(uid) ?? {};
-      const stats = statsByUserId.get(uid) ?? {};
+      const item = snapshotMembers[uid] ?? {};
 
-      const points = Number(entry.points ?? 0);
-      const weeklyActiveDays = Number(entry.weeklyActiveDays ?? 0);
-
-      const seasonActiveDays = Number(
-        entry.seasonActiveDays ?? stats.seasonActiveDays ?? 0,
-      );
-
-      const seasonZeroDays = Number(
-        entry.seasonZeroDays ??
-          stats.seasonZeroDays ??
-          Math.max(0, elapsedSeasonDays - seasonActiveDays),
-      );
+      const points = Number(item.points ?? 0);
+      const weeklyActiveDays = Number(item.weeklyActiveDays ?? 0);
+      const seasonActiveDays = Number(item.seasonActiveDays ?? 0);
+      const seasonZeroDays = Math.max(0, elapsedSeasonDays - seasonActiveDays);
 
       return {
         userId: uid,
-        displayName: nameByUserId.get(uid) ?? "Usuário",
+        displayName: String(item.displayName ?? "Usuário"),
         points,
         weeklyActiveDays,
         seasonActiveDays,
@@ -370,28 +548,7 @@ export const getWeeklyGroupRanking = functions.https.onCall(
     });
 
     ranking.sort(sortRanking);
-
-    let previousKey = "";
-    let previousPosition = 0;
-
-    ranking.forEach((entry, index) => {
-      const key = buildSortKey(entry);
-      if (index === 0) {
-        entry.position = 1;
-        previousKey = key;
-        previousPosition = 1;
-        return;
-      }
-
-      if (key === previousKey) {
-        entry.position = previousPosition;
-        return;
-      }
-
-      entry.position = index + 1;
-      previousKey = key;
-      previousPosition = entry.position;
-    });
+    assignRankingPositions(ranking);
 
     const myPosition =
       ranking.find((entry) => entry.userId === context.auth?.uid) ?? null;

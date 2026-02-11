@@ -113,7 +113,8 @@ class GroupPage extends StatelessWidget {
           ),
         ),
       ),
-      builder: (ranking) {
+      builder: (ranking) => Watch((context) {
+        final names = controller.memberNamesAS.watch(context).value ?? {};
         final myPosition = ranking.myPosition;
         final myPositionOutsideTop =
             myPosition != null && myPosition.position > ranking.top.length;
@@ -170,8 +171,12 @@ class GroupPage extends StatelessWidget {
                 )
               else
                 ...ranking.top.map(
-                  (entry) =>
-                      _buildRankingTile(theme, entry, highlighted: false),
+                  (entry) => _buildRankingTile(
+                    theme,
+                    entry,
+                    highlighted: false,
+                    displayNameOverride: names[entry.userId],
+                  ),
                 ),
               if (myPositionOutsideTop) ...[
                 const SizedBox(height: 8),
@@ -182,12 +187,17 @@ class GroupPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildRankingTile(theme, myPosition, highlighted: true),
+                _buildRankingTile(
+                  theme,
+                  myPosition,
+                  highlighted: true,
+                  displayNameOverride: names[myPosition.userId],
+                ),
               ],
             ],
           ),
         );
-      },
+      }),
     );
   }
 
@@ -195,6 +205,7 @@ class GroupPage extends StatelessWidget {
     ThemeData theme,
     WeeklyRankingEntryModel entry, {
     required bool highlighted,
+    String? displayNameOverride,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -227,7 +238,7 @@ class GroupPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  entry.displayName,
+                  _resolveRankingName(entry, displayNameOverride),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyLarge?.copyWith(
@@ -263,6 +274,23 @@ class GroupPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _resolveRankingName(
+    WeeklyRankingEntryModel entry,
+    String? displayNameOverride,
+  ) {
+    if (displayNameOverride != null && displayNameOverride.trim().isNotEmpty) {
+      return displayNameOverride;
+    }
+
+    if (entry.displayName.trim().isNotEmpty && entry.displayName != 'Usuário') {
+      return entry.displayName;
+    }
+
+    final uid = entry.userId;
+    final suffix = uid.length >= 6 ? uid.substring(0, 6) : uid;
+    return 'Membro $suffix';
   }
 
   Widget _buildMyProgressSection(

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '../../../core/core.dart';
 import '../models/models.dart';
@@ -9,12 +10,15 @@ import 'storage_repository.dart';
 
 class CheckInRepositoryImpl implements CheckInRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseFunctions _functions;
   final StorageRepository _storageRepository;
 
   CheckInRepositoryImpl({
     required FirestoreAdapter firestore,
+    required FunctionsAdapter functionsAdapter,
     required StorageRepository storageRepository,
   }) : _firestore = firestore.instance,
+       _functions = functionsAdapter.instance,
        _storageRepository = storageRepository;
 
   CollectionReference<Map<String, dynamic>> _checkInsRef(String groupId) =>
@@ -41,6 +45,7 @@ class CheckInRepositoryImpl implements CheckInRepository {
       'userId': userId,
       'habitId': habitId,
       'date': date,
+      'storagePath': storagePath,
       'photoUrl': photoUrl,
       'description': description ?? '',
       'completedAt': FieldValue.serverTimestamp(),
@@ -75,5 +80,17 @@ class CheckInRepositoryImpl implements CheckInRepository {
     return snapshot.docs
         .map((doc) => CheckInModel.fromFirestore(doc.id, doc.data()))
         .toList();
+  }
+
+  @override
+  Future<void> deleteCheckIn({
+    required String groupId,
+    required String checkinId,
+  }) async {
+    final callable = _functions.httpsCallable('deleteCheckIn');
+    await callable.call(<String, dynamic>{
+      'groupId': groupId,
+      'checkinId': checkinId,
+    });
   }
 }

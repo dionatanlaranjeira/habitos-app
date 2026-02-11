@@ -17,6 +17,7 @@ mixin GroupVariables {
   final checkinCommentsAS = asyncSignal<List<CommentModel>>(AsyncLoading());
   final weeklyRankingAS = asyncSignal<WeeklyRankingModel>(AsyncLoading());
   final submitCheckInAS = asyncSignal<void>(AsyncData(null));
+  final groupActionAS = asyncSignal<void>(AsyncData(null));
 
   final selectedDate = signal<DateTime>(DateTime.now());
   final isHabitsListExpanded = signal<bool>(false);

@@ -203,6 +203,16 @@ class GroupController with GroupVariables {
       futureFunction: _weeklyRankingRepository.getWeeklyRanking(
         groupId: _groupId,
       ),
+      onValue: (ranking) {
+        final ids = <String>{
+          ...ranking.top.map((e) => e.userId),
+          if (ranking.myPosition != null) ranking.myPosition!.userId,
+        }.toList();
+
+        if (ids.isNotEmpty) {
+          _loadMemberNames(ids);
+        }
+      },
     ).call(showLoading: !silent);
   }
 
@@ -332,6 +342,44 @@ class GroupController with GroupVariables {
 
   Future<void> refreshWeeklyRanking() async {
     _loadWeeklyRanking();
+  }
+
+  Future<void> ensureMemberNamesLoaded(List<String> userIds) {
+    return _loadMemberNames(userIds);
+  }
+
+  Future<void> deleteCheckIn(String checkinId) async {
+    await FutureHandler<void>(
+      asyncState: groupActionAS,
+      futureFunction: _checkInRepository.deleteCheckIn(
+        groupId: _groupId,
+        checkinId: checkinId,
+      ),
+      onValue: (_) {
+        Messages.success('Check-in removido com sucesso.');
+        _loadCheckIns(silent: true);
+        _loadWeeklyRanking(silent: true);
+      },
+      catchError: (e, s) {
+        Log.error('Erro ao remover check-in', error: e, stackTrace: s);
+        Messages.error('Não foi possível remover o check-in.');
+      },
+    ).call(showLoading: false);
+  }
+
+  Future<void> leaveGroup() async {
+    await FutureHandler<void>(
+      asyncState: groupActionAS,
+      futureFunction: _groupRepository.leaveGroup(groupId: _groupId),
+      onValue: (_) {
+        Messages.success('Você saiu do grupo.');
+        AppRouter.router.go('/home');
+      },
+      catchError: (e, s) {
+        Log.error('Erro ao sair do grupo', error: e, stackTrace: s);
+        Messages.error('Não foi possível sair do grupo.');
+      },
+    ).call();
   }
 
   // --- INTERAÇÕES ---

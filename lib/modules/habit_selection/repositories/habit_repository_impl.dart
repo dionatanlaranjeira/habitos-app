@@ -53,7 +53,7 @@ class HabitRepositoryImpl implements HabitRepository {
 
     batch.set(memberRef, {
       'userId': userId,
-      'habitIds': habitIds,
+      'selectedHabitIds': habitIds,
       'joinedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
