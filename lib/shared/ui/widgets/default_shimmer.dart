@@ -1,4 +1,3 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -9,13 +8,11 @@ class DefaultShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Shimmer.fromColors(
-      baseColor: AdaptiveTheme.of(context).mode.isDark
-          ? Colors.grey.shade900
-          : Colors.grey.shade300,
-      highlightColor: AdaptiveTheme.of(context).mode.isDark
-          ? Colors.grey.shade600
-          : Colors.grey.shade100,
+      baseColor: isDark ? Colors.grey.shade900 : Colors.grey.shade300,
+      highlightColor: isDark ? Colors.grey.shade600 : Colors.grey.shade100,
       enabled: true,
       child: child,
     );

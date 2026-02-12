@@ -17,7 +17,7 @@ class AppWidget extends StatelessWidget {
         providers: AppRouter.globalProviders,
         child: AdaptiveTheme(
           light: UiConfig.lightTheme,
-          initial: AdaptiveThemeMode.light,
+          initial: AdaptiveThemeMode.system,
           dark: UiConfig.darkTheme,
           builder: (light, dark) =>
               AppRouterScope(lightTheme: light, darkTheme: dark),
