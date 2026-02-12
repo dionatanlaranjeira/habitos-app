@@ -31,14 +31,13 @@ class GroupController with GroupVariables {
            interactionRepository, // Added to initializer list
        _weeklyRankingRepository = weeklyRankingRepository,
        _userStore = userStore {
-    // Sincroniza o nome do próprio usuário reativamente
+    // Sincroniza o perfil do próprio usuário reativamente
     effect(() {
-      final name = _userStore.name;
-      final uid = _userStore.uid;
-      if (name != null && uid != null) {
-        final currentMap = memberNamesAS.value.value ?? {};
-        if (currentMap[uid] != name) {
-          memberNamesAS.value = AsyncData({...currentMap, uid: name});
+      final user = _userStore.user.value;
+      if (user != null) {
+        final currentMap = memberProfilesAS.value.value ?? {};
+        if (currentMap[user.uid] != user) {
+          memberProfilesAS.value = AsyncData({...currentMap, user.uid: user});
         }
       }
     });
@@ -93,35 +92,38 @@ class GroupController with GroupVariables {
       asyncState: membersAS,
       futureFunction: _groupRepository.getGroupMembers(_groupId),
       onValue: (members) =>
-          _loadMemberNames(members.map((m) => m.userId).toList()),
+          _loadMemberProfiles(members.map((m) => m.userId).toList()),
     ).call();
   }
 
-  Future<void> _loadMemberNames(List<String> userIds) async {
-    final Map<String, String> names = {...memberNamesAS.value.value ?? {}};
+  Future<void> _loadMemberProfiles(List<String> userIds) async {
+    final Map<String, UserModel> profiles = {
+      ...memberProfilesAS.value.value ?? {},
+    };
     bool changed = false;
 
     // Filtra IDs que ainda não temos no cache
-    final missingIds = userIds.where((id) => !names.containsKey(id)).toSet();
+    final missingIds = userIds.where((id) => !profiles.containsKey(id)).toSet();
 
     if (missingIds.isEmpty) return;
 
-    // Busca os nomes faltantes em paralelo
+    // Busca os perfis faltantes em paralelo
     await Future.wait(
       missingIds.map((id) async {
         try {
-          final name = await _groupRepository.getUserName(id);
-          names[id] = name ?? 'Usuário';
-          changed = true;
+          final user = await _groupRepository.getUserById(id);
+          if (user != null) {
+            profiles[id] = user;
+            changed = true;
+          }
         } catch (e) {
-          names[id] = 'Erro';
-          changed = true;
+          Log.error('Erro ao carregar perfil do usuário $id', error: e);
         }
       }),
     );
 
     if (changed) {
-      memberNamesAS.value = AsyncData(names);
+      memberProfilesAS.value = AsyncData(profiles);
     }
   }
 
@@ -167,7 +169,7 @@ class GroupController with GroupVariables {
       onValue: (checkins) {
         if (checkins.isNotEmpty) {
           final userIds = checkins.map((c) => c.userId).toList();
-          _loadMemberNames(userIds);
+          _loadMemberProfiles(userIds);
         }
       },
     ).call(showLoading: !silent);
@@ -210,7 +212,7 @@ class GroupController with GroupVariables {
         }.toList();
 
         if (ids.isNotEmpty) {
-          _loadMemberNames(ids);
+          _loadMemberProfiles(ids);
         }
       },
     ).call(showLoading: !silent);
@@ -340,8 +342,8 @@ class GroupController with GroupVariables {
     _loadWeeklyRanking();
   }
 
-  Future<void> ensureMemberNamesLoaded(List<String> userIds) {
-    return _loadMemberNames(userIds);
+  Future<void> ensureMemberProfilesLoaded(List<String> userIds) {
+    return _loadMemberProfiles(userIds);
   }
 
   Future<void> deleteCheckIn(String checkinId) async {

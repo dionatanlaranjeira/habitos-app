@@ -3,6 +3,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import '../../../core/core.dart';
 import '../../home/models/group_member_model.dart';
 import '../../home/models/group_model.dart';
+import '../../../global_modules/user/models/user_model.dart';
 import 'group_detail_repository.dart';
 
 class GroupDetailRepositoryImpl implements GroupDetailRepository {
@@ -54,9 +55,10 @@ class GroupDetailRepositoryImpl implements GroupDetailRepository {
   }
 
   @override
-  Future<String?> getUserName(String userId) async {
+  Future<UserModel?> getUserById(String userId) async {
     final doc = await _firestore.collection('users').doc(userId).get();
-    return doc.data()?['name'] as String?;
+    if (!doc.exists || doc.data() == null) return null;
+    return UserModel.fromFirestore(doc.id, doc.data()!);
   }
 
   @override

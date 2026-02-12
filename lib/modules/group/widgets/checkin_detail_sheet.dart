@@ -12,6 +12,7 @@ class CheckinDetailSheet extends StatefulWidget {
   final String checkinId;
   final GroupController controller;
   final String memberName;
+  final String? memberPhotoUrl;
   final String habitName;
   final IconData habitIcon;
 
@@ -20,6 +21,7 @@ class CheckinDetailSheet extends StatefulWidget {
     required this.checkinId,
     required this.controller,
     required this.memberName,
+    this.memberPhotoUrl,
     required this.habitName,
     required this.habitIcon,
   });
@@ -81,8 +83,11 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
         );
       }
 
-      final names = widget.controller.memberNamesAS.watch(context).value ?? {};
-      final memberName = names[checkIn.userId] ?? widget.memberName;
+      final profiles =
+          widget.controller.memberProfilesAS.watch(context).value ?? {};
+      final memberProfile = profiles[checkIn.userId];
+      final memberName = memberProfile?.name ?? widget.memberName;
+      final memberPhotoUrl = memberProfile?.photoUrl ?? widget.memberPhotoUrl;
       final timeStr = DateFormat('HH:mm').format(checkIn.completedAt);
 
       return Container(
@@ -122,13 +127,21 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
                     backgroundColor: theme.colorScheme.primary.withValues(
                       alpha: 0.1,
                     ),
-                    child: Text(
-                      memberName.isNotEmpty ? memberName[0].toUpperCase() : '?',
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    backgroundImage:
+                        memberPhotoUrl != null && memberPhotoUrl.isNotEmpty
+                        ? NetworkImage(memberPhotoUrl)
+                        : null,
+                    child: memberPhotoUrl == null || memberPhotoUrl.isEmpty
+                        ? Text(
+                            memberName.isNotEmpty
+                                ? memberName[0].toUpperCase()
+                                : '?',
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -248,15 +261,15 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
                               const SizedBox(height: 16),
                           itemBuilder: (context, index) {
                             final comment = comments[index];
+                            final profile = widget
+                                .controller
+                                .memberProfilesAS
+                                .value
+                                .value?[comment.userId];
                             return _CommentTile(
                               comment: comment,
-                              memberName:
-                                  widget
-                                      .controller
-                                      .memberNamesAS
-                                      .value
-                                      .value?[comment.userId] ??
-                                  'Usuário',
+                              memberName: profile?.name ?? 'Usuário',
+                              memberPhotoUrl: profile?.photoUrl,
                               isOwner:
                                   comment.userId ==
                                   widget.controller.userStore.uid,
@@ -374,12 +387,14 @@ class _CheckinDetailSheetState extends State<CheckinDetailSheet> {
 class _CommentTile extends StatelessWidget {
   final CommentModel comment;
   final String memberName;
+  final String? memberPhotoUrl;
   final bool isOwner;
   final VoidCallback onDelete;
 
   const _CommentTile({
     required this.comment,
     required this.memberName,
+    this.memberPhotoUrl,
     required this.isOwner,
     required this.onDelete,
   });
@@ -395,14 +410,19 @@ class _CommentTile extends StatelessWidget {
         CircleAvatar(
           radius: 14,
           backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-          child: Text(
-            memberName.isNotEmpty ? memberName[0].toUpperCase() : '?',
-            style: TextStyle(
-              color: theme.colorScheme.primary,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          backgroundImage: memberPhotoUrl != null && memberPhotoUrl!.isNotEmpty
+              ? NetworkImage(memberPhotoUrl!)
+              : null,
+          child: memberPhotoUrl == null || memberPhotoUrl!.isEmpty
+              ? Text(
+                  memberName.isNotEmpty ? memberName[0].toUpperCase() : '?',
+                  style: TextStyle(
+                    color: theme.colorScheme.primary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : null,
         ),
         const SizedBox(width: 10),
         Expanded(

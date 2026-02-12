@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../../global_modules/global_modules.dart';
-import '../../modules/home/repositories/repositories.dart';
 import '../../modules/habit_selection/repositories/repositories.dart';
 import '../core.dart';
 
@@ -16,23 +15,18 @@ class AppRouter {
   static List<SingleChildWidget> get globalProviders => [
     Provider<LocalSecureStorage>(create: (_) => LocalSecureStorageImpl()),
     Provider<FirestoreAdapter>(create: (_) => FirestoreAdapter()),
+    Provider<StorageAdapter>(create: (_) => StorageAdapter()),
     Provider<FunctionsAdapter>(create: (_) => FunctionsAdapter()),
     Provider<AuthRepository>(create: (_) => AuthRepositoryImpl()),
     Provider<UserRepository>(
-      create: (ctx) =>
-          UserRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
-    ),
-    Provider<HomeRepository>(
-      create: (ctx) =>
-          HomeRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
+      create: (ctx) => UserRepositoryImpl(
+        firestore: ctx.read<FirestoreAdapter>(),
+        storage: ctx.read<StorageAdapter>(),
+      ),
     ),
     Provider<HabitRepository>(
       create: (ctx) =>
           HabitRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
-    ),
-    Provider<CategoryRepository>(
-      create: (ctx) =>
-          CategoryRepositoryImpl(firestore: ctx.read<FirestoreAdapter>()),
     ),
     Provider<LocaleStore>(create: (_) => LocaleStore(ApplicationConfig.prefs)),
     Provider<UserStore>(

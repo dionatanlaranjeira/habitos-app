@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:signals/signals.dart';
 
 import '../../home/models/models.dart';
+import '../../../global_modules/global_modules.dart';
 import '../../habit_selection/models/habit_model.dart';
 import '../models/models.dart';
 
@@ -13,7 +14,7 @@ mixin GroupVariables {
   final myCheckInsAS = asyncSignal<List<CheckInModel>>(AsyncLoading());
   final allCheckInsAS = asyncSignal<List<CheckInModel>>(AsyncLoading());
   final membersAS = asyncSignal<List<GroupMemberModel>>(AsyncLoading());
-  final memberNamesAS = asyncSignal<Map<String, String>>(AsyncData({}));
+  final memberProfilesAS = asyncSignal<Map<String, UserModel>>(AsyncData({}));
   final checkinCommentsAS = asyncSignal<List<CommentModel>>(AsyncLoading());
   final weeklyRankingAS = asyncSignal<WeeklyRankingModel>(AsyncLoading());
   final submitCheckInAS = asyncSignal<void>(AsyncData(null));

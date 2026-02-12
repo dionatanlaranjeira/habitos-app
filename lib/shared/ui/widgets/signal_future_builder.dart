@@ -32,15 +32,15 @@ class SignalFutureBuilder<D> extends StatelessWidget {
           return errorWidget ??
               ErrorBuilder(error: asyncState.error, onRetry: onRetry);
         }
-        if (asyncState.hasValue &&
-            asyncState.value is D &&
-            asyncState.value != null) {
-          if (asyncState.value is List && (asyncState.value as List).isEmpty) {
-            return emptyWidget ?? Text("Nenhum dado encontrado");
+        if (asyncState.hasValue) {
+          final value = asyncState.value;
+          if (value is List && value.isEmpty) {
+            return emptyWidget ?? const Text("Nenhum dado encontrado");
           }
-          return builder(asyncState.value as D);
+          return builder(value as D);
         }
-        return Text("Erro: Erro desconhecido");
+        return errorWidget ??
+            ErrorBuilder(error: asyncState.error, onRetry: onRetry);
       },
     );
   }

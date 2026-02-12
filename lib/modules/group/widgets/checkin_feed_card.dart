@@ -9,6 +9,7 @@ import 'widgets.dart';
 class CheckinFeedCard extends StatelessWidget {
   final CheckInModel checkIn;
   final String memberName;
+  final String? memberPhotoUrl;
   final String habitName;
   final IconData habitIcon;
   final GroupController controller;
@@ -17,6 +18,7 @@ class CheckinFeedCard extends StatelessWidget {
     super.key,
     required this.checkIn,
     required this.memberName,
+    this.memberPhotoUrl,
     required this.habitName,
     required this.habitIcon,
     required this.controller,
@@ -67,14 +69,22 @@ class CheckinFeedCard extends StatelessWidget {
                     backgroundColor: theme.colorScheme.primary.withValues(
                       alpha: 0.1,
                     ),
-                    child: Text(
-                      memberName.isNotEmpty ? memberName[0].toUpperCase() : '?',
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
+                    backgroundImage:
+                        memberPhotoUrl != null && memberPhotoUrl!.isNotEmpty
+                        ? NetworkImage(memberPhotoUrl!)
+                        : null,
+                    child: memberPhotoUrl == null || memberPhotoUrl!.isEmpty
+                        ? Text(
+                            memberName.isNotEmpty
+                                ? memberName[0].toUpperCase()
+                                : '?',
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
