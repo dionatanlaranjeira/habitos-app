@@ -176,9 +176,9 @@ class GroupInfoSheet extends StatelessWidget {
                   child: Watch((context) {
                     final members =
                         controller.membersAS.watch(context).value ?? [];
-                    final names =
-                        controller.memberNamesAS.watch(context).value ?? {};
-                    controller.ensureMemberNamesLoaded(
+                    final profiles =
+                        controller.memberProfilesAS.watch(context).value ?? {};
+                    controller.ensureMemberProfilesLoaded(
                       members.map((m) => m.userId).toList(),
                     );
 
@@ -188,9 +188,10 @@ class GroupInfoSheet extends StatelessWidget {
                       itemCount: members.length,
                       itemBuilder: (context, index) {
                         final member = members[index];
+                        final profile = profiles[member.userId];
                         final name =
-                            names[member.userId] ??
-                            _fallbackMemberName(member.userId);
+                            profile?.name ?? _fallbackMemberName(member.userId);
+                        final photoUrl = profile?.photoUrl;
                         final isOwner = member.userId == group.ownerId;
 
                         return ListTile(
@@ -199,13 +200,21 @@ class GroupInfoSheet extends StatelessWidget {
                           ),
                           leading: CircleAvatar(
                             backgroundColor: theme.colorScheme.primaryContainer,
-                            child: Text(
-                              name.isNotEmpty ? name[0].toUpperCase() : '?',
-                              style: TextStyle(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            backgroundImage:
+                                photoUrl != null && photoUrl.isNotEmpty
+                                ? NetworkImage(photoUrl)
+                                : null,
+                            child: photoUrl == null || photoUrl.isEmpty
+                                ? Text(
+                                    name.isNotEmpty
+                                        ? name[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                : null,
                           ),
                           title: Text(
                             name,

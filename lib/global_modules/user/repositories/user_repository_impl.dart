@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../../core/core.dart';
 import '../models/user_model.dart';
@@ -7,10 +9,14 @@ import 'user_repository.dart';
 const _usersCollection = 'users';
 
 class UserRepositoryImpl implements UserRepository {
-  UserRepositoryImpl({required FirestoreAdapter firestore})
-      : _firestore = firestore.instance;
+  UserRepositoryImpl({
+    required FirestoreAdapter firestore,
+    required StorageAdapter storage,
+  }) : _firestore = firestore.instance,
+       _storage = storage.instance;
 
   final FirebaseFirestore _firestore;
+  final FirebaseStorage _storage;
 
   CollectionReference<Map<String, dynamic>> get _ref =>
       _firestore.collection(_usersCollection);
@@ -30,5 +36,12 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> updateUser(String uid, Map<String, dynamic> data) async {
     await _ref.doc(uid).update(data);
+  }
+
+  @override
+  Future<String> uploadProfilePicture(String uid, String filePath) async {
+    final ref = _storage.ref().child('users').child(uid).child('profile.jpg');
+    await ref.putFile(File(filePath));
+    return await ref.getDownloadURL();
   }
 }

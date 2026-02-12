@@ -24,6 +24,7 @@ GoRouter createAppRouter(UserStore userStore) {
       SplashModule().route,
       LoginModule().route,
       RegisterModule().route,
+      ProfileModule().route,
       HomeModule(
         routes: [
           HabitSelectionModule().route,
