@@ -119,6 +119,58 @@ class RegisterPage extends StatelessWidget {
                     );
                   }),
 
+                  const SizedBox(height: 16),
+
+                  // Divider
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'ou',
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Social Buttons
+                  Watch((_) {
+                    final isLoading = controller.registerSignal.value.isLoading;
+                    return Column(
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: isLoading
+                              ? null
+                              : controller.registerWithGoogle,
+                          icon: const Icon(Icons.g_mobiledata, size: 24),
+                          label: const Text('Continuar com Google'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 40),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        if (Theme.of(context).platform == TargetPlatform.iOS)
+                          OutlinedButton.icon(
+                            onPressed: isLoading
+                                ? null
+                                : controller.registerWithApple,
+                            icon: const Icon(Icons.apple, size: 24),
+                            label: const Text('Continuar com Apple'),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 40),
+                            ),
+                          ),
+                      ],
+                    );
+                  }),
+
                   const SizedBox(height: 32),
 
                   // Login link

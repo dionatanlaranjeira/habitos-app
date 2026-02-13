@@ -39,6 +39,19 @@ class LoginController with LoginVariables {
     ).call();
   }
 
+  Future<void> loginWithApple() async {
+    await FutureHandler(
+      asyncState: loginSignal,
+      futureFunction: _authRepository.signInWithApple(),
+      onValue: (credential) async {
+        if (credential == null) return;
+        final user = credential.user;
+        if (user != null) await _ensureUserDoc(user);
+        _goHome();
+      },
+    ).call();
+  }
+
   Future<void> _ensureUserDoc(firebase_auth.User authUser) async {
     final existing = await _userRepository.getUser(authUser.uid);
     if (existing != null) return;

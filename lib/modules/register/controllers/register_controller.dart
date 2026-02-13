@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+
 import '../../../core/core.dart';
 import '../../../shared/shared.dart';
 import '../../../global_modules/global_modules.dart';
@@ -39,5 +41,45 @@ class RegisterController with RegisterVariables {
         AppRouter.router.go(HomeModule.path);
       },
     ).call();
+  }
+
+  Future<void> registerWithGoogle() async {
+    await FutureHandler(
+      asyncState: registerSignal,
+      futureFunction: _authRepository.signInWithGoogle(),
+      onValue: (credential) async {
+        if (credential == null) return;
+        final user = credential.user;
+        if (user != null) await _ensureUserDoc(user);
+        AppRouter.router.go(HomeModule.path);
+      },
+    ).call();
+  }
+
+  Future<void> registerWithApple() async {
+    await FutureHandler(
+      asyncState: registerSignal,
+      futureFunction: _authRepository.signInWithApple(),
+      onValue: (credential) async {
+        if (credential == null) return;
+        final user = credential.user;
+        if (user != null) await _ensureUserDoc(user);
+        AppRouter.router.go(HomeModule.path);
+      },
+    ).call();
+  }
+
+  Future<void> _ensureUserDoc(firebase_auth.User authUser) async {
+    final existing = await _userRepository.getUser(authUser.uid);
+    if (existing != null) return;
+    final user = UserModel(
+      uid: authUser.uid,
+      name:
+          authUser.displayName ?? authUser.email?.split('@').first ?? 'Usuário',
+      email: authUser.email ?? '',
+      photoUrl: authUser.photoURL,
+      createdAt: DateTime.now(),
+    );
+    await _userRepository.createUser(user);
   }
 }

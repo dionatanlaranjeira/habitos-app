@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>1008207391772-6n4inpasep7pobeblamn22nutmmbajbv.apps.googleusercontent.com</string>
+	<string>1008207391772-l7ahuk5g4rtun22t5g84ea2lp8oa9bam.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.1008207391772-6n4inpasep7pobeblamn22nutmmbajbv</string>
+	<string>com.googleusercontent.apps.1008207391772-l7ahuk5g4rtun22t5g84ea2lp8oa9bam</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1008207391772-033hh77pe69uqlchjaupe98o24qs1t35.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBYYLjYAQhSqBXPp9mJNyUbSNi2qffU314</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.habitus</string>
+	<string>br.com.habitusapp</string>
 	<key>PROJECT_ID</key>
 	<string>habitos-app-1b86b</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1008207391772:ios:b23c4d826787e5c4ff83d9</string>
+	<string>1:1008207391772:ios:b595f38a55782300ff83d9</string>
 </dict>
 </plist>

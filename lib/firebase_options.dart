@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDEbBDC0jY6xp1xSMxz-FYq8jvsIb6J14k',
-    appId: '1:1008207391772:android:acd0503715dd4ba4ff83d9',
+    appId: '1:1008207391772:android:6b4151d6cdfd579cff83d9',
     messagingSenderId: '1008207391772',
     projectId: 'habitos-app-1b86b',
     storageBucket: 'habitos-app-1b86b.firebasestorage.app',
@@ -59,12 +59,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBYYLjYAQhSqBXPp9mJNyUbSNi2qffU314',
-    appId: '1:1008207391772:ios:b23c4d826787e5c4ff83d9',
+    appId: '1:1008207391772:ios:b595f38a55782300ff83d9',
     messagingSenderId: '1008207391772',
     projectId: 'habitos-app-1b86b',
     storageBucket: 'habitos-app-1b86b.firebasestorage.app',
-    iosClientId: '1008207391772-6n4inpasep7pobeblamn22nutmmbajbv.apps.googleusercontent.com',
-    iosBundleId: 'com.habitus',
+    androidClientId: '1008207391772-033hh77pe69uqlchjaupe98o24qs1t35.apps.googleusercontent.com',
+    iosClientId: '1008207391772-l7ahuk5g4rtun22t5g84ea2lp8oa9bam.apps.googleusercontent.com',
+    iosBundleId: 'br.com.habitusapp',
   );
 
 }

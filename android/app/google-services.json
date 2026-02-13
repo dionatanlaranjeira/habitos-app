@@ -7,26 +7,26 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1008207391772:android:acd0503715dd4ba4ff83d9",
+        "mobilesdk_app_id": "1:1008207391772:android:6b4151d6cdfd579cff83d9",
         "android_client_info": {
-          "package_name": "com.habitus"
+          "package_name": "br.com.habitusapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1008207391772-9u40sam0c3sdtsihvg8qf9e13a3rrvfn.apps.googleusercontent.com",
+          "client_id": "1008207391772-033hh77pe69uqlchjaupe98o24qs1t35.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.habitus",
-            "certificate_hash": "0d521889aba2ea3f8a860e4ce7a82149da6011d5"
+            "package_name": "br.com.habitusapp",
+            "certificate_hash": "43c132fe1f1c99410befc36621b6ec82421c325f"
           }
         },
         {
-          "client_id": "1008207391772-t3ofrr7l9meq9043315guh6bsic66kc6.apps.googleusercontent.com",
+          "client_id": "1008207391772-0oajsp6107u8c17kc8pl55rf81fcjfjo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.habitus",
-            "certificate_hash": "43c132fe1f1c99410befc36621b6ec82421c325f"
+            "package_name": "br.com.habitusapp",
+            "certificate_hash": "0d521889aba2ea3f8a860e4ce7a82149da6011d5"
           }
         },
         {
@@ -45,13 +45,6 @@
             {
               "client_id": "1008207391772-6oog45e5ds37994l3rj3ijkjivm6fppj.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "1008207391772-5cauo1nddukgm20ng873fv51u77imfmj.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.habitos"
-              }
             }
           ]
         }

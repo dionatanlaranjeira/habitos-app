@@ -137,6 +137,20 @@ class LoginPage extends StatelessWidget {
                     );
                   }),
 
+                  if (Theme.of(context).platform == TargetPlatform.iOS) ...[
+                    const SizedBox(height: 12),
+
+                    // Apple button
+                    Watch((_) {
+                      final isLoading = controller.loginSignal.value.isLoading;
+                      return OutlinedButton.icon(
+                        onPressed: isLoading ? null : controller.loginWithApple,
+                        icon: const Icon(Icons.apple, size: 24),
+                        label: const Text('Continuar com Apple'),
+                      );
+                    }),
+                  ],
+
                   const SizedBox(height: 32),
 
                   // Register link
