@@ -1,4 +1,4 @@
-package br.com.habitusapp
+package com.orangesoftwares.habitus
 
 import io.flutter.embedding.android.FlutterActivity
 

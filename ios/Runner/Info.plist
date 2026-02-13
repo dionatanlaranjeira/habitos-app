@@ -15,7 +15,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>habitusapp</string>
+		<string>habitus</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -58,11 +58,11 @@
 				<string>Editor</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
-					<string>com.googleusercontent.apps.1008207391772-l7ahuk5g4rtun22t5g84ea2lp8oa9bam</string>
+					<string>com.googleusercontent.apps.1008207391772-12g4r7c4mddub2tsu0gto8o67uc44dj8</string>
 				</array>
 			</dict>
 		</array>
 		<key>GIDClientID</key>
-		<string>1008207391772-l7ahuk5g4rtun22t5g84ea2lp8oa9bam.apps.googleusercontent.com</string>
+		<string>1008207391772-12g4r7c4mddub2tsu0gto8o67uc44dj8.apps.googleusercontent.com</string>
 	</dict>
 </plist>
